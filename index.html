@@ -1282,13 +1282,16 @@
     // STAGE 4: GADGET LAB (60s TIMER + MONEY SCANNER)
     // ==========================================
     const gadgetScannerDenominations = [
-      { label: "10 sen", value: 0.10, isCoin: true },
-      { label: "20 sen", value: 0.20, isCoin: true },
-      { label: "50 sen", value: 0.50, isCoin: true },
-      { label: "RM1", value: 1.00, isCoin: false },
-      { label: "RM5", value: 5.00, isCoin: false },
-      { label: "RM10", value: 10.00, isCoin: false },
-      { label: "RM20", value: 20.00, isCoin: false }
+      { label: "RM100", sub: "+ RM100", value: 100.00 },
+      { label: "RM50", sub: "+ RM50", value: 50.00 },
+      { label: "RM20", sub: "+ RM20", value: 20.00 },
+      { label: "RM10", sub: "+ RM10", value: 10.00 },
+      { label: "RM5", sub: "+ RM5", value: 5.00 },
+      { label: "RM1", sub: "+ RM1", value: 1.00 },
+      { label: "50 sen", sub: "+ 50 sen", value: 0.50 },
+      { label: "20 sen", sub: "+ 20 sen", value: 0.20 },
+      { label: "10 sen", sub: "+ 10 sen", value: 0.10 },
+      { label: "5 sen", sub: "+ 5 sen", value: 0.05 }
     ];
 
     function startGadgetLabTimer() {
@@ -1334,115 +1337,150 @@
 
       const ringgitWhole = Math.floor(totalCents / 100);
       const senRem = totalCents % 100;
-      const tensDigit = Math.floor(ringgitWhole / 10);
+      const hundredsDigit = Math.floor(ringgitWhole / 100) % 10;
+      const tensDigit = Math.floor(ringgitWhole / 10) % 10;
       const onesDigit = ringgitWhole % 10;
 
       box.innerHTML = `
         <div class="space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-            <div class="flex items-center gap-3">
-              <span class="text-3xl">🤖</span>
+          <!-- Header matching screenshot -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-2">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#21d4e5] to-[#0284c7] flex items-center justify-center text-2xl shadow-lg">
+                🧪
+              </div>
               <div>
-                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 04 / 08 • MONEY SCANNER</div>
-                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
-                  ${currentLang === 'en' ? '4. GADGET LAB: PLACE VALUE SCANNER' : '4. MAKMAL GAJET: PENGIMBAS NILAI TEMPAT'}
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white tracking-wide">
+                  ${currentLang === 'en' ? 'GADGET LAB: MONEY SCANNER' : 'MAKMAL GAJET: PENGIMBAS WANG'}
                 </h2>
+                <p class="text-xs sm:text-sm text-[#8fb2d4] mt-0.5">
+                  ${currentLang === 'en'
+                    ? 'Tap banknotes and coins. The scanner calculates the total and shows the place values.'
+                    : 'Ketik wang kertas dan syiling. Pengimbas mengira jumlah dan memaparkan nilai tempat.'}
+                </p>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${isLockedOut || gadgetTimeLeft <= 15 ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#21d4e5]/20 text-[#21d4e5] border border-[#21d4e5]/40'}">
+              <span class="px-3 py-1.5 rounded-full text-xs font-hud font-bold ${isLockedOut || gadgetTimeLeft <= 15 ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#21d4e5]/15 text-[#21d4e5] border border-[#21d4e5]/40'}">
                 ⏱ <span id="gadgetLabTimerText">${isLockedOut ? 'STOPPED' : `${gadgetTimeLeft}s`}</span>
               </span>
-              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${completedStages[3] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : isLockedOut ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
+              <span class="px-3 py-1.5 rounded-full text-xs font-hud font-bold ${completedStages[3] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : isLockedOut ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
                 ${completedStages[3] ? '✓ COMPLETED' : isLockedOut ? '✕ INCOMPLETE' : `TARGET: RM ${gadgetTargetAmount.toFixed(2)}`}
               </span>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-[#07162b] border border-[#ffdf59]/40 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <div class="font-hud text-xs font-bold text-[#ffdf59] uppercase">
-                ${currentLang === 'en' ? 'ACTIVE GADGET CALIBRATION TARGET' : 'SASARAN KALIBRASI GAJET AKTIF'}
-              </div>
-              <p class="text-xs sm:text-sm text-slate-200 mt-0.5">
-                ${currentLang === 'en'
-                  ? `Tap notes & coins below to scan an exact total of RM ${gadgetTargetAmount.toFixed(2)} before the 60s timer runs out! (Leaving this mission stops the timer)`
-                  : `Ketik wang kertas & syiling di bawah untuk mengimbas jumlah tepat RM ${gadgetTargetAmount.toFixed(2)} sebelum masa 60s tamat! (Meninggalkan misi ini akan menghentikan pemasa)`}
-              </p>
-            </div>
-            <button type="button" onclick="retakeStage4GadgetLab()" class="btn-yellow px-4 py-2 rounded-xl font-hud text-xs uppercase">
-              🔄 ${currentLang === 'en' ? 'RETAKE / NEW TARGET' : 'AMBIL SEMULA / SASARAN BAHARU'}
+          <!-- Active Mission Calibration Strip -->
+          <div class="p-3.5 rounded-2xl bg-[#07162b] border border-[#ffdf59]/35 flex flex-wrap items-center justify-between gap-3">
+            <p class="text-xs sm:text-sm text-slate-200">
+              <span class="font-hud font-bold text-[#ffdf59]">MISSION TARGET:</span>
+              ${currentLang === 'en'
+                ? `Scan an exact total of <strong class="text-[#ffdf59]">RM ${gadgetTargetAmount.toFixed(2)}</strong> within 60s. (Leaving this stage stops the timer)`
+                : `Imbas jumlah tepat <strong class="text-[#ffdf59]">RM ${gadgetTargetAmount.toFixed(2)}</strong> dalam masa 60s. (Keluar dari peringkat ini menghentikan pemasa)`}
+            </p>
+            <button type="button" onclick="retakeStage4GadgetLab()" class="px-3.5 py-1.5 rounded-xl bg-[#ffdf59]/15 hover:bg-[#ffdf59]/25 border border-[#ffdf59]/50 text-[#ffdf59] font-hud text-xs font-bold uppercase">
+              🔄 ${currentLang === 'en' ? 'NEW TARGET' : 'SASARAN BAHARU'}
             </button>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div class="lg:col-span-6 p-5 rounded-2xl bg-[#07162b] border border-[#21d4e5]/25 space-y-4">
-              <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">
-                ${currentLang === 'en' ? 'TAP MALAYSIAN CURRENCY TO SCAN' : 'KETIK MATA WANG MALAYSIA UNTUK IMBAS'}
-              </div>
-              <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-                ${gadgetScannerDenominations.map(item => `
-                  <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="addGadgetLabItem(${item.value})"
-                    class="p-3 rounded-xl border font-hud text-xs sm:text-sm font-extrabold transition ${
-                      item.isCoin
-                        ? 'bg-[#ffdf59]/15 hover:bg-[#ffdf59]/30 border-[#ffdf59]/50 text-[#ffdf59]'
-                        : 'bg-[#21d4e5]/15 hover:bg-[#21d4e5]/30 border-[#21d4e5]/50 text-[#21d4e5]'
-                    } ${isLockedOut ? 'opacity-45 cursor-not-allowed' : ''}">
-                    + ${item.label}
+          <!-- Main Scanner Panel matching Screenshot -->
+          <div class="rounded-3xl bg-[#0b1f38]/95 border border-[#21d4e5]/25 p-5 sm:p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <!-- LEFT COLUMN: SELECT MONEY ITEMS -->
+              <div class="lg:col-span-6 space-y-4">
+                <div class="font-hud text-xs font-bold uppercase tracking-widest text-[#21d4e5]">
+                  ${currentLang === 'en' ? 'SELECT MONEY ITEMS' : 'PILIH ITEM WANG'}
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  ${gadgetScannerDenominations.map(item => `
+                    <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="addGadgetLabItem(${item.value})"
+                      class="py-4 px-3 rounded-2xl bg-[#132c49] hover:bg-[#1a3a60] border border-[#21d4e5]/35 hover:border-[#21d4e5] text-center transition flex flex-col items-center justify-center gap-1 shadow-md ${isLockedOut ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}">
+                      <span class="font-hud text-base sm:text-lg font-extrabold text-[#ffdf59]">${item.label}</span>
+                      <span class="text-xs font-semibold text-white/90">${item.sub}</span>
+                    </button>
+                  `).join('')}
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="resetGadgetLabScanner()"
+                    class="px-5 py-3 rounded-2xl bg-[#0c213b] hover:bg-[#132e52] border border-[#21d4e5]/45 font-hud text-xs sm:text-sm font-bold text-[#21d4e5] uppercase tracking-wider transition ${isLockedOut ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}">
+                    ↻ ${currentLang === 'en' ? 'RESET SCANNER' : 'SET SEMULA PENGIMBAS'}
                   </button>
-                `).join('')}
-              </div>
-
-              <div class="flex flex-wrap gap-2 pt-2">
-                <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="resetGadgetLabScanner()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-hud font-bold text-slate-200 ${isLockedOut ? 'opacity-45 cursor-not-allowed' : ''}">
-                  CLEAR SCANNER
-                </button>
-                <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="randomGadgetLabSample()" class="px-4 py-2 rounded-xl bg-[#21d4e5]/15 hover:bg-[#21d4e5]/25 border border-[#21d4e5]/40 text-xs font-hud font-bold text-[#21d4e5] ${isLockedOut ? 'opacity-45 cursor-not-allowed' : ''}">
-                  AUTO SAMPLE
-                </button>
-              </div>
-            </div>
-
-            <div class="lg:col-span-6 p-5 rounded-2xl bg-[#07162b] border border-[#34d399]/30 space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="font-hud text-xs font-bold uppercase text-[#34d399]">SCANNED VALUE & PLACE VALUE</span>
-                <span class="font-hud text-2xl font-black text-white">RM ${totalVal.toFixed(2)}</span>
-              </div>
-
-              <div class="grid grid-cols-3 gap-2.5 text-center">
-                <div class="p-3 rounded-xl bg-[#0c203b] border border-white/10">
-                  <div class="text-[10px] font-hud text-[#8fb2d4]">TENS (RM10)</div>
-                  <div class="font-hud text-xl font-black text-[#21d4e5] mt-1">${tensDigit}</div>
-                </div>
-                <div class="p-3 rounded-xl bg-[#0c203b] border border-white/10">
-                  <div class="text-[10px] font-hud text-[#8fb2d4]">ONES (RM1)</div>
-                  <div class="font-hud text-xl font-black text-[#ffdf59] mt-1">${onesDigit}</div>
-                </div>
-                <div class="p-3 rounded-xl bg-[#0c203b] border border-white/10">
-                  <div class="text-[10px] font-hud text-[#8fb2d4]">SEN (¢)</div>
-                  <div class="font-hud text-xl font-black text-[#34d399] mt-1">${String(senRem).padStart(2, '0')}</div>
-                </div>
-              </div>
-
-              ${isTargetMatched ? `
-                <div class="p-4 rounded-xl bg-[#34d399]/20 border border-[#34d399] text-center space-y-2">
-                  <div class="font-hud text-sm font-black text-[#34d399]">✓ EXACT TARGET CALIBRATED! (+150 XP)</div>
-                  <button type="button" onclick="selectStage(5)" class="btn-mint px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
-                    PROCEED TO STAGE 05: IRIS PROTOCOL →
+                  <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="randomGadgetLabSample()"
+                    class="btn-yellow px-5 py-3 rounded-2xl font-hud text-xs sm:text-sm uppercase tracking-wider ${isLockedOut ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}">
+                    ⚡ ${currentLang === 'en' ? 'RANDOM SAMPLE' : 'SAMPEL RAWAK'}
                   </button>
                 </div>
-              ` : isLockedOut ? `
-                <div class="p-4 rounded-xl bg-[#ff526b]/20 border-2 border-[#ff526b] text-center space-y-2">
-                  <div class="font-hud text-sm font-black text-[#ff526b]">
-                    ${gadgetAbandoned
-                      ? (currentLang === 'en' ? '✕ MISSION INCOMPLETE — YOU LEFT THE GADGET LAB' : '✕ MISI TIDAK LENGKAP — ANDA KELUAR DARI MAKMAL GAJET')
-                      : (currentLang === 'en' ? '⏱ TIME EXPIRED — MISSION INCOMPLETE!' : '⏱ MASA TAMAT — MISI TIDAK LENGKAP!')}
+              </div>
+
+              <!-- RIGHT COLUMN: TOTAL ENERGY / MONEY VALUE & PLACE VALUE SCANNER -->
+              <div class="lg:col-span-6 space-y-5">
+                <div class="rounded-2xl bg-[#07162b] border border-[#21d4e5]/40 p-6 sm:p-7 text-center space-y-2 shadow-inner">
+                  <div class="font-hud text-xs font-bold uppercase tracking-widest text-[#21d4e5]">
+                    ${currentLang === 'en' ? 'TOTAL ENERGY / MONEY VALUE' : 'JUMLAH TENAGA / NILAI WANG'}
                   </div>
-                  <button type="button" onclick="retakeStage4GadgetLab()" class="btn-yellow px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
-                    🔄 ${currentLang === 'en' ? 'RETAKE GADGET LAB MISSION' : 'AMBIL SEMULA MISI MAKMAL GAJET'}
-                  </button>
+                  <div class="font-hud text-4xl sm:text-5xl font-black text-[#ffdf59] tracking-tight">
+                    RM${totalVal.toFixed(2)}
+                  </div>
+                  <div class="text-xs sm:text-sm text-[#8fb2d4] font-medium">
+                    ${gadgetLabItems.length} ${currentLang === 'en' ? (gadgetLabItems.length === 1 ? 'item scanned' : 'items scanned') : 'item diimbas'}
+                  </div>
                 </div>
-              ` : ''}
+
+                <div class="space-y-3">
+                  <h3 class="font-hud text-base sm:text-lg font-extrabold text-white">
+                    ${currentLang === 'en' ? 'Place Value Scanner' : 'Pengimbas Nilai Tempat'}
+                  </h3>
+
+                  <div class="grid grid-cols-5 gap-2 sm:gap-2.5 text-center">
+                    <div class="p-3 rounded-xl bg-[#132c49] border border-[#21d4e5]/25">
+                      <div class="text-[9px] sm:text-[10px] font-hud font-bold text-[#8fb2d4] uppercase">HUNDREDS</div>
+                      <div class="font-hud text-xl sm:text-2xl font-black text-white mt-1">${hundredsDigit}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-[#132c49] border border-[#21d4e5]/25">
+                      <div class="text-[9px] sm:text-[10px] font-hud font-bold text-[#8fb2d4] uppercase">TENS</div>
+                      <div class="font-hud text-xl sm:text-2xl font-black text-white mt-1">${tensDigit}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-[#132c49] border border-[#21d4e5]/25">
+                      <div class="text-[9px] sm:text-[10px] font-hud font-bold text-[#8fb2d4] uppercase">ONES</div>
+                      <div class="font-hud text-xl sm:text-2xl font-black text-white mt-1">${onesDigit}</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-[#132c49] border border-[#21d4e5]/25">
+                      <div class="text-[9px] sm:text-[10px] font-hud font-bold text-[#8fb2d4] uppercase">DECIMAL</div>
+                      <div class="font-hud text-xl sm:text-2xl font-black text-white mt-1">.</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-[#132c49] border border-[#21d4e5]/25">
+                      <div class="text-[9px] sm:text-[10px] font-hud font-bold text-[#8fb2d4] uppercase">SEN</div>
+                      <div class="font-hud text-xl sm:text-2xl font-black text-white mt-1">${String(senRem).padStart(2, '0')}</div>
+                    </div>
+                  </div>
+
+                  <p class="text-xs sm:text-sm text-[#8fb2d4]">
+                    Ringgit: RM${ringgitWhole} • Sen: ${senRem} • 100 sen = RM1.00
+                  </p>
+                </div>
+
+                ${isTargetMatched ? `
+                  <div class="p-4 rounded-2xl bg-[#34d399]/20 border border-[#34d399] text-center space-y-2">
+                    <div class="font-hud text-sm font-black text-[#34d399]">✓ EXACT TARGET CALIBRATED! (+150 XP)</div>
+                    <button type="button" onclick="selectStage(5)" class="btn-mint px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
+                      PROCEED TO STAGE 05: IRIS PROTOCOL →
+                    </button>
+                  </div>
+                ` : isLockedOut ? `
+                  <div class="p-4 rounded-2xl bg-[#ff526b]/20 border-2 border-[#ff526b] text-center space-y-2">
+                    <div class="font-hud text-sm font-black text-[#ff526b]">
+                      ${gadgetAbandoned
+                        ? (currentLang === 'en' ? '✕ MISSION INCOMPLETE — YOU LEFT THE GADGET LAB' : '✕ MISI TIDAK LENGKAP — ANDA KELUAR DARI MAKMAL GAJET')
+                        : (currentLang === 'en' ? '⏱ TIME EXPIRED — MISSION INCOMPLETE!' : '⏱ MASA TAMAT — MISI TIDAK LENGKAP!')}
+                    </div>
+                    <button type="button" onclick="retakeStage4GadgetLab()" class="btn-yellow px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
+                      🔄 ${currentLang === 'en' ? 'RETAKE GADGET LAB MISSION' : 'AMBIL SEMULA MISI MAKMAL GAJET'}
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
             </div>
           </div>
         </div>
@@ -1465,32 +1503,34 @@
     function randomGadgetLabSample() {
       if (gadgetTimerExpired || gadgetAbandoned) return;
       playMataSfx('scanner');
+      const pool = [100, 50, 20, 10, 5, 1, 0.50, 0.20, 0.10, 0.05];
+      const count = 2 + Math.floor(Math.random() * 4);
       gadgetLabItems = [];
-      const count = 3 + Math.floor(Math.random() * 4);
       for (let i = 0; i < count; i++) {
-        const randItem = gadgetScannerDenominations[Math.floor(Math.random() * gadgetScannerDenominations.length)];
-        gadgetLabItems.push(randItem.value);
+        gadgetLabItems.push(pool[Math.floor(Math.random() * pool.length)]);
       }
       renderActiveStageWorkspace();
     }
 
     function retakeStage4GadgetLab() {
-      const targets = [12.80, 16.50, 18.30, 23.70, 27.40, 31.90];
-      gadgetTargetAmount = targets[Math.floor(Math.random() * targets.length)];
+      const candidates = [16.50, 25.80, 35.70, 55.25, 70.60, 120.75, 15.90, 42.35];
+      const others = candidates.filter(v => Math.round(v * 100) !== Math.round(gadgetTargetAmount * 100));
+      gadgetTargetAmount = others[Math.floor(Math.random() * others.length)];
       gadgetLabItems = [];
       gadgetTimeLeft = 60;
       gadgetTimerExpired = false;
       gadgetAbandoned = false;
-      startGadgetLabTimer();
+      incompleteStages[3] = false;
       renderStagesGrid();
+      startGadgetLabTimer();
       renderActiveStageWorkspace();
     }
 
     // ==========================================
-    // STAGE 5: IRIS PROTOCOL (3 MISSIONS, PASS >= 2/3, EMPTY BOXES)
+    // STAGE 5: IRIS PROTOCOL (REGROUP 100 SEN = RM1.00)
     // ==========================================
     function renderStage5IrisProtocol(box) {
-      const cur = m5RoundMissions[m5Index];
+      const m = m5RoundMissions[m5Index];
       const pct = Math.round(((m5RoundComplete ? 3 : m5Index) / 3) * 100);
       const passed = m5Score >= 2;
 
@@ -1502,162 +1542,148 @@
               <div>
                 <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 05 / 08 • REGROUPING PROTOCOL</div>
                 <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
-                  ${currentLang === 'en' ? '5. MISSION 5: IRIS PROTOCOL' : '5. MISI 5: PROTOKOL IRIS'}
+                  ${currentLang === 'en' ? '5. IRIS PROTOCOL: REGROUP 100 SEN' : '5. PROTOKOL IRIS: KUMPUL SEMULA 100 SEN'}
                 </h2>
               </div>
             </div>
-            <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${completedStages[4] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
-              ${completedStages[4] ? '✓ COMPLETED' : (currentLang === 'en' ? 'PASS MARK: 2 / 3' : 'MARKAH LULUS: 2 / 3')}
-            </span>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-[#07162b] border border-white/10">
-            <div class="font-hud text-xs sm:text-sm font-bold text-[#21d4e5]">
-              ${currentLang === 'en' ? `MISSION ${Math.min(m5Index + 1, 3)} OF 3` : `MISI ${Math.min(m5Index + 1, 3)} DARIPADA 3`}
-            </div>
-            <div class="font-hud text-xs sm:text-sm font-bold text-[#ffdf59]">
-              ${currentLang === 'en' ? `SCORE: ${m5Score} / 3` : `SKOR: ${m5Score} / 3`}
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="irisLessonOpen = !irisLessonOpen; renderActiveStageWorkspace();"
+                class="px-3 py-1.5 rounded-xl bg-[#21d4e5]/15 hover:bg-[#21d4e5]/25 border border-[#21d4e5]/40 text-[#21d4e5] font-hud text-xs font-bold">
+                📘 ${currentLang === 'en' ? (irisLessonOpen ? 'HIDE LESSON' : 'IRIS LESSON') : (irisLessonOpen ? 'TUTUP NOTA' : 'NOTA IRIS')}
+              </button>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${completedStages[4] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
+                ${completedStages[4] ? '✓ COMPLETED' : (currentLang === 'en' ? 'PASS MARK: 2 / 3' : 'MARKAH LULUS: 2 / 3')}
+              </span>
             </div>
           </div>
 
-          <div class="w-full h-2.5 rounded-full bg-[#07162b] overflow-hidden border border-white/10">
-            <div class="h-full bg-gradient-to-r from-[#21d4e5] to-[#34d399] transition-all duration-300" style="width:${pct}%"></div>
-          </div>
+          ${irisLessonOpen ? `
+            <div class="p-4 rounded-2xl bg-[#07162b] border border-[#21d4e5]/40 text-xs sm:text-sm text-slate-200 space-y-2">
+              <div class="font-hud text-xs font-bold text-[#ffdf59]">I.R.I.S. REGROUPING RULE: 100 SEN = RM1.00</div>
+              <p>${currentLang === 'en'
+                ? 'When Sen adds up to 100 or more, split out 100 sen into RM1.00 and keep the remaining sen on the right of the decimal point (e.g., 75 sen + 45 sen = 120 sen = RM1.20).'
+                : 'Apabila hasil tambah Sen mencapai 100 atau lebih, tukarkan 100 sen kepada RM1.00 dan kekalkan baki sen di sebelah kanan titik perpuluhan (cth: 75 sen + 45 sen = 120 sen = RM1.20).'}</p>
+            </div>
+          ` : ''}
 
-          ${!m5RoundComplete ? `
-            <div class="p-6 rounded-2xl bg-[#07162b] border border-[#21d4e5]/25 space-y-5">
-              <p class="text-base sm:text-lg font-bold text-white">
-                ${currentLang === 'en'
-                  ? `Mission ${m5Index + 1} of 3: Regroup every 100 sen as RM1.00. Calculate ${cur.a} sen + ${cur.b} sen.`
-                  : `Misi ${m5Index + 1} daripada 3: Kumpul semula setiap 100 sen sebagai RM1.00. Hitung ${cur.a} sen + ${cur.b} sen.`}
-              </p>
-
-              <!-- Empty Simulator Boxes so students calculate/type themselves -->
-              <div class="flex flex-wrap items-center gap-3">
-                <input id="irisInputSenA" type="number" min="0" max="999" value="${escapeHtmlText(irisSenA)}" placeholder="?"
-                  class="w-24 px-4 py-3.5 rounded-2xl bg-[#0c203b] border-2 border-[#21d4e5]/40 focus:border-[#21d4e5] focus:outline-none font-hud text-xl font-black text-center text-white" />
-                <span class="font-hud text-2xl font-black text-[#21d4e5]">+</span>
-                <input id="irisInputSenB" type="number" min="0" max="999" value="${escapeHtmlText(irisSenB)}" placeholder="?"
-                  class="w-24 px-4 py-3.5 rounded-2xl bg-[#0c203b] border-2 border-[#21d4e5]/40 focus:border-[#21d4e5] focus:outline-none font-hud text-xl font-black text-center text-white" />
-                <span class="font-hud text-lg font-bold text-slate-300">sen</span>
-                <button type="button" onclick="runIrisProtocolSimulation()" class="btn-yellow px-6 py-3.5 rounded-2xl font-hud text-xs sm:text-sm uppercase">
-                  RUN SIMULATION
-                </button>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: 3 Regrouping Missions -->
+            <div class="lg:col-span-7 space-y-4">
+              <div class="flex items-center justify-between p-3.5 rounded-2xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold">
+                <span class="text-[#21d4e5]">MISSION ${Math.min(m5Index + 1, 3)} OF 3</span>
+                <span class="text-[#ffdf59]">SCORE: ${m5Score} / 3</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-[#07162b] overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-[#21d4e5] to-[#34d399] transition-all" style="width:${pct}%"></div>
               </div>
 
-              ${irisSimResult ? `
-                <div class="p-4 rounded-xl bg-[#21d4e5]/12 border border-[#21d4e5]/40 font-hud text-xs sm:text-sm text-[#21d4e5]">
-                  I.R.I.S. OUTPUT: ${irisSimResult.a} sen + ${irisSimResult.b} sen = <span class="text-white font-black">${irisSimResult.totalSen} sen</span> → Regrouped: <span class="text-[#34d399] font-black">RM${irisSimResult.ringgit}.${String(irisSimResult.remSen).padStart(2, '0')}</span>
-                </div>
-              ` : ''}
+              ${!m5RoundComplete ? `
+                <div class="p-6 rounded-2xl bg-[#07162b] border border-[#21d4e5]/25 space-y-4 text-center">
+                  <div class="font-hud text-xs uppercase text-[#8fb2d4]">
+                    ${currentLang === 'en' ? 'CONVERT COMBINED SEN INTO RINGGIT & SEN' : 'TUKARKAN GABUNGAN SEN KEPADA RINGGIT & SEN'}
+                  </div>
+                  <div class="font-hud text-3xl sm:text-4xl font-black text-[#ffdf59]">
+                    ${m.a} sen + ${m.b} sen = ?
+                  </div>
 
-              <div class="pt-2 space-y-3">
-                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">
-                  ${currentLang === 'en'
-                    ? `VERIFY MISSION ${m5Index + 1} ANSWER (${cur.a} SEN + ${cur.b} SEN)`
-                    : `SAHKAN JAWAPAN MISI ${m5Index + 1} (${cur.a} SEN + ${cur.b} SEN)`}
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  ${cur.options.map((opt, idx) => {
-                    let btnStyle = 'bg-[#0c203b] hover:bg-[#132d52] border-[#21d4e5]/30 text-white';
-                    if (m5AnsweredCurrent) {
-                      if (idx === cur.correct) btnStyle = 'bg-[#34d399]/25 border-[#34d399] text-[#34d399]';
-                      else if (idx === m5SelectedOption) btnStyle = 'bg-[#ff526b]/25 border-[#ff526b] text-[#ff526b]';
-                      else btnStyle = 'bg-[#07162b]/60 border-white/10 text-slate-400 opacity-60';
-                    }
-                    return `
-                      <button type="button" ${m5AnsweredCurrent ? 'disabled' : ''} onclick="answerStage5IrisMission(${idx})"
-                        class="p-4 rounded-xl border-2 text-center font-hud text-base font-bold transition ${btnStyle}">
-                        ${opt}
+                  <div class="grid grid-cols-2 gap-3 pt-2">
+                    ${m.options.map((opt, idx) => {
+                      let btnStyle = 'bg-[#0c203b] hover:bg-[#132d52] border-[#21d4e5]/30 text-white';
+                      if (m5AnsweredCurrent) {
+                        if (idx === m.correct) btnStyle = 'bg-[#34d399]/25 border-[#34d399] text-[#34d399]';
+                        else if (idx === m5SelectedOption) btnStyle = 'bg-[#ff526b]/25 border-[#ff526b] text-[#ff526b]';
+                        else btnStyle = 'bg-[#07162b]/60 border-white/10 text-slate-400 opacity-60';
+                      }
+                      return `
+                        <button type="button" ${m5AnsweredCurrent ? 'disabled' : ''} onclick="answerStage5Iris(${idx})"
+                          class="p-4 rounded-xl border-2 font-hud text-base font-bold transition ${btnStyle}">
+                          ${opt}
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+
+                  ${m5AnsweredCurrent ? `
+                    <div class="p-3 rounded-xl bg-[#21d4e5]/10 border border-[#21d4e5]/35 text-xs text-[#21d4e5] font-semibold">
+                      ${currentLang === 'en' ? m.expEn : m.expBm}
+                    </div>
+                    <div class="flex justify-end">
+                      <button type="button" onclick="nextStage5Mission()" class="btn-cyan px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
+                        ${m5Index === 2 ? 'FINISH IRIS PROTOCOL →' : 'NEXT MISSION →'}
                       </button>
-                    `;
-                  }).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              ` : `
+                <div class="p-6 rounded-2xl border-2 ${passed ? 'bg-[#34d399]/15 border-[#34d399]' : 'bg-[#ff526b]/15 border-[#ff526b]'} text-center space-y-4">
+                  <div class="text-4xl">${passed ? '👓' : '🔄'}</div>
+                  <h3 class="font-hud text-xl font-black text-white">
+                    ${passed ? (currentLang === 'en' ? 'IRIS REGROUPING MASTERED!' : 'PENGUMPULAN SEMULA IRIS BERJAYA!') : (currentLang === 'en' ? 'SCORE BELOW 2 / 3 — TRY AGAIN' : 'SKOR BAWAH 2 / 3 — CUBA LAGI')}
+                  </h3>
+                  <div class="flex flex-wrap justify-center gap-3">
+                    ${passed ? `<button type="button" onclick="selectStage(6)" class="btn-mint px-5 py-3 rounded-xl font-hud text-xs uppercase">STAGE 06: MINI MARKET →</button>` : ''}
+                    <button type="button" onclick="initMission5Round(); renderActiveStageWorkspace();" class="btn-yellow px-5 py-3 rounded-xl font-hud text-xs uppercase">
+                      🔄 ${currentLang === 'en' ? 'NEW 3 MISSIONS' : '3 MISI BAHARU'}
+                    </button>
+                  </div>
+                </div>
+              `}
+            </div>
+
+            <!-- Right: Interactive Sen Regrouping Simulator -->
+            <div class="lg:col-span-5 p-5 rounded-2xl bg-[#07162b] border border-[#21d4e5]/30 space-y-4">
+              <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">I.R.I.S. SEN REGROUPING SIMULATOR</div>
+              <p class="text-xs text-[#8fb2d4]">
+                ${currentLang === 'en' ? 'Enter any two Sen values to see how 100 sen converts into RM1.00:' : 'Masukkan sebarang dua nilai Sen untuk melihat penukaran 100 sen kepada RM1.00:'}
+              </p>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-hud text-[#8fb2d4] mb-1">SEN A</label>
+                  <input id="irisSimInputA" type="number" min="0" value="${irisSenA}" placeholder="e.g. 75"
+                    class="w-full px-3 py-2.5 rounded-xl bg-[#0c203b] border border-[#21d4e5]/40 font-hud text-white text-sm" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-hud text-[#8fb2d4] mb-1">SEN B</label>
+                  <input id="irisSimInputB" type="number" min="0" value="${irisSenB}" placeholder="e.g. 45"
+                    class="w-full px-3 py-2.5 rounded-xl bg-[#0c203b] border border-[#21d4e5]/40 font-hud text-white text-sm" />
                 </div>
               </div>
-
-              ${m5AnsweredCurrent ? `
-                <div class="p-3.5 rounded-xl bg-[#34d399]/15 border border-[#34d399]/40 text-xs sm:text-sm text-[#34d399] font-semibold">
-                  💡 ${currentLang === 'en' ? cur.expEn : cur.expBm}
-                </div>
-                <div class="flex justify-end">
-                  <button type="button" onclick="nextStage5IrisMission()" class="btn-cyan px-6 py-3 rounded-xl font-hud text-xs sm:text-sm uppercase">
-                    ${m5Index === 2 ? (currentLang === 'en' ? 'FINISH IRIS PROTOCOL →' : 'TAMATKAN PROTOKOL IRIS →') : (currentLang === 'en' ? 'NEXT MISSION →' : 'MISI SETERUSNYA →')}
-                  </button>
+              <button type="button" onclick="runIrisSenSimulator()" class="w-full btn-cyan py-2.5 rounded-xl font-hud text-xs uppercase">
+                ⚡ ${currentLang === 'en' ? 'RUN REGROUPING SCAN' : 'JALANKAN IMBASAN KUMPUL'}
+              </button>
+              ${irisSimResult ? `
+                <div class="p-3.5 rounded-xl bg-[#0c203b] border border-[#34d399]/40 text-center space-y-1">
+                  <div class="text-xs text-[#8fb2d4]">${irisSimResult.totalSen} sen = ${irisSimResult.rm} Ringgit + ${irisSimResult.remSen} sen</div>
+                  <div class="font-hud text-2xl font-black text-[#34d399]">RM ${irisSimResult.rm}.${String(irisSimResult.remSen).padStart(2, '0')}</div>
                 </div>
               ` : ''}
             </div>
-          ` : `
-            <div class="p-6 rounded-2xl border-2 ${passed ? 'bg-[#34d399]/15 border-[#34d399]' : 'bg-[#ff526b]/15 border-[#ff526b]'} text-center space-y-4">
-              <div class="text-4xl">${passed ? '👓' : '🔄'}</div>
-              <h3 class="font-hud text-2xl font-black text-white">
-                ${passed ? (currentLang === 'en' ? 'IRIS PROTOCOL PASSED!' : 'PROTOKOL IRIS DILULUSKAN!') : (currentLang === 'en' ? 'SCORE BELOW 2 / 3 — RETAKE REQUIRED' : 'SKOR BAWAH 2 / 3 — PERLU AMBIL SEMULA')}
-              </h3>
-              <p class="text-sm text-slate-200">
-                ${currentLang === 'en' ? `You completed ${m5Score} out of 3 regrouping missions.` : `Anda melengkapkan ${m5Score} daripada 3 misi pengumpulan semula.`}
-              </p>
-              <div class="flex flex-wrap justify-center gap-3">
-                ${passed ? `<button type="button" onclick="selectStage(6)" class="btn-mint px-6 py-3 rounded-xl font-hud text-xs sm:text-sm uppercase">STAGE 06: MINI MARKET →</button>` : ''}
-                <button type="button" onclick="initMission5Round(); renderActiveStageWorkspace();" class="btn-yellow px-6 py-3 rounded-xl font-hud text-xs sm:text-sm uppercase">
-                  🔄 ${currentLang === 'en' ? 'RETAKE WITH 3 NEW MISSIONS' : 'AMBIL SEMULA DENGAN 3 MISI BAHARU'}
-                </button>
-              </div>
-            </div>
-          `}
+          </div>
         </div>
       `;
     }
 
-    function runIrisProtocolSimulation() {
-      const inputA = document.getElementById('irisInputSenA');
-      const inputB = document.getElementById('irisInputSenB');
-      if (inputA) irisSenA = inputA.value;
-      if (inputB) irisSenB = inputB.value;
-
-      if (irisSenA === '' || irisSenB === '') {
-        playMataSfx('wrong');
-        showToast(
-          currentLang === 'en' ? "INPUT REQUIRED" : "INPUT DIPERLUKAN",
-          currentLang === 'en' ? "Type both sen numbers into the boxes yourself first!" : "Taip kedua-dua nombor sen ke dalam kotak sendiri dahulu!",
-          "💡"
-        );
-        return;
-      }
-
-      playMataSfx('scanner');
-      const numA = Math.max(0, parseInt(irisSenA, 10) || 0);
-      const numB = Math.max(0, parseInt(irisSenB, 10) || 0);
-      const totalSen = numA + numB;
-      const ringgit = Math.floor(totalSen / 100);
-      const remSen = totalSen % 100;
-
-      irisSimResult = { a: numA, b: numB, totalSen, ringgit, remSen };
-      renderActiveStageWorkspace();
-    }
-
-    function answerStage5IrisMission(selectedIdx) {
+    function answerStage5Iris(selectedIdx) {
       if (m5AnsweredCurrent) return;
-      const cur = m5RoundMissions[m5Index];
+      const m = m5RoundMissions[m5Index];
       m5AnsweredCurrent = true;
       m5SelectedOption = selectedIdx;
-      if (selectedIdx === cur.correct) {
+      if (selectedIdx === m.correct) {
         m5Score++;
         playMataSfx('correct');
-        showToast("REGROUP VERIFIED!", currentLang === 'en' ? `Correct: ${cur.options[cur.correct]}` : `Tepat sekali: ${cur.options[cur.correct]}`, "✅");
+        showToast("IRIS VERIFIED!", currentLang === 'en' ? `Correct: ${m.options[m.correct]}` : `Tepat sekali: ${m.options[m.correct]}`, "✅");
       } else {
         playMataSfx('wrong');
-        showToast("INCORRECT", currentLang === 'en' ? `Correct answer: ${cur.options[cur.correct]}` : `Jawapan betul: ${cur.options[cur.correct]}`, "❌");
+        showToast("INCORRECT", currentLang === 'en' ? `Correct answer: ${m.options[m.correct]}` : `Jawapan betul: ${m.options[m.correct]}`, "❌");
       }
       renderActiveStageWorkspace();
     }
 
-    function nextStage5IrisMission() {
+    function nextStage5Mission() {
       if (m5Index < 2) {
         m5Index++;
         m5AnsweredCurrent = false;
         m5SelectedOption = null;
-        irisSenA = '';
-        irisSenB = '';
-        irisSimResult = null;
       } else {
         m5RoundComplete = true;
         if (m5Score >= 2) completeStage(5, 150);
@@ -1666,16 +1692,33 @@
       renderActiveStageWorkspace();
     }
 
+    function runIrisSenSimulator() {
+      playMataSfx('scanner');
+      const aEl = document.getElementById('irisSimInputA');
+      const bEl = document.getElementById('irisSimInputB');
+      irisSenA = aEl ? aEl.value : '';
+      irisSenB = bEl ? bEl.value : '';
+      const a = Math.max(0, parseInt(irisSenA, 10) || 0);
+      const b = Math.max(0, parseInt(irisSenB, 10) || 0);
+      const totalSen = a + b;
+      irisSimResult = {
+        totalSen,
+        rm: Math.floor(totalSen / 100),
+        remSen: totalSen % 100
+      };
+      renderActiveStageWorkspace();
+    }
+
     // ==========================================
-    // STAGE 6: MINI MARKET (RM20 BUDGET, RECEIPT & CHANGE SCANNER)
+    // STAGE 6: MINI MARKET (BUDGET RM20.00 + RECEIPT + CHANGE SCANNER)
     // ==========================================
     const marketBudgetCatalog = [
-      { id: 1, icon: "🍱", name: { en: "Healthy Meal & Water", bm: "Makanan Sihat & Air" }, price: 4.50, type: "need" },
-      { id: 2, icon: "📓", name: { en: "Tactical Notebook", bm: "Buku Nota Taktikal" }, price: 3.50, type: "need" },
-      { id: 3, icon: "✏️", name: { en: "Stationery Set", bm: "Set Alat Tulis" }, price: 5.00, type: "need" },
-      { id: 4, icon: "🏦", name: { en: "Savings Deposit", bm: "Simpanan Tabung" }, price: 4.00, type: "need" },
-      { id: 5, icon: "🪀", name: { en: "Limited Edition Yoyo", bm: "Yoyo Edisi Terhad" }, price: 9.50, type: "want" },
-      { id: 6, icon: "🍬", name: { en: "Sweet Candy Pack", bm: "Pek Gula-gula Manis" }, price: 6.00, type: "want" }
+      { id: 1, name: { en: "Nasi Lemak & Mineral Water", bm: "Nasi Lemak & Air Mineral" }, price: 4.50, type: "need", icon: "🍱" },
+      { id: 2, name: { en: "M.A.T.A Tactical Notebook", bm: "Buku Nota Taktikal M.A.T.A" }, price: 3.50, type: "need", icon: "📓" },
+      { id: 3, name: { en: "Complete Stationery Set", bm: "Set Alat Tulis Lengkap" }, price: 5.00, type: "need", icon: "✏️" },
+      { id: 4, name: { en: "Emergency Savings Deposit", bm: "Tabung Simpanan Kecemasan" }, price: 4.00, type: "need", icon: "🏦" },
+      { id: 5, name: { en: "Limited Edition Yoyo Toy", bm: "Mainan Yoyo Edisi Terhad" }, price: 9.50, type: "want", icon: "🪀" },
+      { id: 6, name: { en: "Candies & Sweet Snacks", bm: "Gula-gula & Snek Manis" }, price: 6.00, type: "want", icon: "🍬" }
     ];
 
     function renderStage6MiniMarket(box) {
@@ -1684,13 +1727,7 @@
         const it = marketBudgetCatalog.find(x => x.id === id);
         if (it) totalSpent += it.price;
       });
-      const remaining = 20.00 - totalSpent;
-
-      const fbClasses = {
-        success: "bg-[#34d399]/15 border border-[#34d399] text-[#34d399]",
-        error: "bg-[#ff526b]/15 border border-[#ff526b] text-[#ff526b]",
-        warning: "bg-[#ffdf59]/15 border border-[#ffdf59] text-[#ffdf59]"
-      };
+      const remainingBudget = 20.00 - totalSpent;
 
       box.innerHTML = `
         <div class="space-y-6">
@@ -1698,9 +1735,9 @@
             <div class="flex items-center gap-3">
               <span class="text-3xl">🏪</span>
               <div>
-                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 06 / 08 • SMART SPENDING</div>
+                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 06 / 08 • FINANCIAL APPLICATION</div>
                 <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
-                  ${currentLang === 'en' ? '6. MINI MARKET: BUDGET & RECEIPT' : '6. PASAR MINI: BAJET & RESIT'}
+                  ${currentLang === 'en' ? '6. MINI MARKET: BUDGET & CHANGE' : '6. PASAR MINI: BAJET & BAKI'}
                 </h2>
               </div>
             </div>
@@ -1710,111 +1747,112 @@
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: RM20.00 Tactical Budget Planner -->
             <div class="lg:col-span-7 p-5 rounded-2xl bg-[#07162b] border border-[#21d4e5]/25 space-y-4">
               <div class="flex items-center justify-between">
                 <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">
-                  ${currentLang === 'en' ? 'SELECT AT LEAST 2 NEEDS WITHIN RM20.00' : 'PILIH SEKURANG-KURANGNYA 2 KEPERLUAN DALAM RM20.00'}
+                  ${currentLang === 'en' ? 'SELECT MISSION SUPPLIES (MAX RM20.00)' : 'PILIH BEKALAN MISI (MAKS RM20.00)'}
                 </div>
-                <div class="font-hud text-base font-black ${remaining >= 0 ? 'text-[#34d399]' : 'text-[#ff526b]'}">
-                  ${currentLang === 'en' ? 'LEFT' : 'BAKI'}: RM ${remaining.toFixed(2)}
+                <div class="font-hud text-sm font-black ${remainingBudget >= 0 ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+                  ${currentLang === 'en' ? 'BALANCE:' : 'BAKI:'} RM ${remainingBudget.toFixed(2)}
                 </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 ${marketBudgetCatalog.map(item => {
-                  const chosen = marketSelectedIds.includes(item.id);
+                  const isSel = marketSelectedIds.includes(item.id);
                   return `
                     <button type="button" onclick="toggleMarketBudgetItem(${item.id})"
-                      class="p-3.5 rounded-xl border-2 text-left transition flex items-center justify-between gap-2 ${
-                        chosen ? 'bg-[#21d4e5]/18 border-[#21d4e5] text-white' : 'bg-[#0c203b] border-white/10 text-slate-300 hover:border-white/30'
-                      }">
+                      class="p-3.5 rounded-xl border-2 text-left transition flex items-center justify-between gap-2 ${isSel ? 'bg-[#21d4e5]/15 border-[#21d4e5]' : 'bg-[#0c203b] border-white/10 hover:border-[#21d4e5]/40'}">
                       <div class="flex items-center gap-2.5">
                         <span class="text-2xl">${item.icon}</span>
                         <div>
                           <div class="text-xs font-bold text-white">${item.name[currentLang]}</div>
-                          <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-hud font-bold ${
-                            item.type === 'need' ? 'bg-[#34d399]/20 text-[#34d399]' : 'bg-[#ffdf59]/20 text-[#ffdf59]'
-                          }">
+                          <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-hud font-bold ${item.type === 'need' ? 'bg-[#34d399]/20 text-[#34d399]' : 'bg-[#ffdf59]/20 text-[#ffdf59]'}">
                             ${item.type === 'need' ? (currentLang === 'en' ? 'NEED' : 'KEPERLUAN') : (currentLang === 'en' ? 'WANT' : 'KEHENDAK')}
                           </span>
                         </div>
                       </div>
-                      <div class="font-hud text-xs font-extrabold text-[#21d4e5]">RM ${item.price.toFixed(2)}</div>
+                      <div class="text-right shrink-0">
+                        <div class="font-hud text-xs font-extrabold text-[#ffdf59]">RM ${item.price.toFixed(2)}</div>
+                        <div class="text-[10px] font-bold ${isSel ? 'text-[#34d399]' : 'text-[#8fb2d4]'}">${isSel ? '✓' : '+'}</div>
+                      </div>
                     </button>
                   `;
                 }).join('')}
               </div>
 
               <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-                <button type="button" onclick="resetStage6BudgetMission()" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 font-hud text-xs font-bold text-slate-200">
-                  RESET BAG
+                <button type="button" onclick="resetStage6BudgetMission()" class="px-4 py-2.5 rounded-xl bg-[#0c203b] border border-white/15 font-hud text-xs font-bold text-slate-300 uppercase">
+                  ${currentLang === 'en' ? 'CLEAR CART' : 'KOSONGKAN TROLI'}
                 </button>
                 <button type="button" onclick="verifyStage6BudgetMission()" class="btn-mint px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
-                  ${currentLang === 'en' ? 'CONFIRM BUDGET & PRINT RECEIPT' : 'SAHKAN BAJET & CETAK RESIT'}
+                  ${currentLang === 'en' ? 'CONFIRM BUDGET & PRINT RECEIPT (+150 XP)' : 'SAHKAN BAJET & CETAK RESIT (+150 XP)'}
                 </button>
               </div>
 
               ${marketFeedbackMsg ? `
-                <div class="p-3.5 rounded-xl text-xs sm:text-sm font-semibold ${fbClasses[marketFeedbackType] || fbClasses.warning}">
+                <div class="p-3.5 rounded-xl text-xs font-semibold ${marketFeedbackType === 'success' ? 'bg-[#34d399]/15 border border-[#34d399] text-[#34d399]' : marketFeedbackType === 'error' ? 'bg-[#ff526b]/15 border border-[#ff526b] text-[#ff526b]' : 'bg-[#ffdf59]/15 border border-[#ffdf59] text-[#ffdf59]'}">
                   ${marketFeedbackMsg}
                 </div>
               ` : ''}
 
               ${marketGeneratedReceipt ? `
-                <div id="mataMarketReceipt" class="rounded-2xl bg-[#040d1a] border-2 border-dashed border-[#34d399]/60 p-5 space-y-3 font-mono text-xs sm:text-sm text-slate-200 shadow-inner">
-                  <div class="flex items-center justify-between border-b border-white/15 pb-2.5">
-                    <div>
-                      <div class="font-hud text-sm font-black text-[#34d399] tracking-wider">🧾 M.A.T.A MINI MARKET RECEIPT</div>
-                      <div class="text-[11px] text-[#8fb2d4]">AGENT: ${escapeHtmlText(agentName)} • REF #${marketGeneratedReceipt.refCode}</div>
-                    </div>
-                    <button type="button" onclick="copyMarketReceiptText()" class="px-3 py-1.5 rounded-lg bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-[11px] font-bold uppercase">
-                      📋 ${currentLang === 'en' ? 'COPY RECEIPT' : 'SALIN RESIT'}
-                    </button>
+                <div class="p-4 rounded-2xl bg-[#040e1c] border border-dashed border-[#21d4e5]/60 font-mono text-xs text-slate-200 space-y-2">
+                  <div class="flex items-center justify-between border-b border-white/15 pb-1.5">
+                    <span class="font-hud font-bold text-[#21d4e5]">🧾 RESIT TRANSAKSI AKADEMI</span>
+                    <span class="text-[10px] text-[#8fb2d4]">${marketGeneratedReceipt.refCode}</span>
                   </div>
-                  <div class="space-y-1.5">
+                  <div class="space-y-1">
                     ${marketGeneratedReceipt.items.map(it => `
                       <div class="flex justify-between">
-                        <span>${it.icon} ${it.name[currentLang]} (${it.type === 'need' ? (currentLang === 'en' ? 'Need' : 'Keperluan') : (currentLang === 'en' ? 'Want' : 'Kehendak')})</span>
-                        <span class="text-white font-bold">RM ${it.price.toFixed(2)}</span>
+                        <span>${it.icon} ${it.name[currentLang]}</span>
+                        <span>RM ${it.price.toFixed(2)}</span>
                       </div>
                     `).join('')}
                   </div>
-                  <div class="border-t border-white/15 pt-2.5 space-y-1 text-xs">
-                    <div class="flex justify-between text-[#8fb2d4]">
-                      <span>${currentLang === 'en' ? 'MISSION BUDGET' : 'BAJET MISI'}:</span>
-                      <span>RM 20.00</span>
-                    </div>
-                    <div class="flex justify-between text-[#ffdf59] font-bold">
-                      <span>${currentLang === 'en' ? 'TOTAL SPENT' : 'JUMLAH BELANJA'}:</span>
-                      <span>RM ${marketGeneratedReceipt.totalSpent.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between text-[#34d399] font-extrabold text-sm">
-                      <span>${currentLang === 'en' ? 'SAVINGS BALANCE' : 'BAKI SIMPANAN'}:</span>
-                      <span>RM ${marketGeneratedReceipt.savedAmount.toFixed(2)}</span>
-                    </div>
+                  <div class="border-t border-white/15 pt-1.5 flex justify-between font-bold text-[#ffdf59]">
+                    <span>TOTAL SPENT:</span>
+                    <span>RM ${marketGeneratedReceipt.totalSpent.toFixed(2)}</span>
+                  </div>
+                  <div class="flex justify-between font-bold text-[#34d399]">
+                    <span>SAVINGS BALANCE:</span>
+                    <span>RM ${marketGeneratedReceipt.savedAmount.toFixed(2)}</span>
+                  </div>
+                  <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="copyMarketReceiptText()" class="px-3 py-1.5 rounded-lg bg-[#21d4e5]/15 border border-[#21d4e5]/40 text-[#21d4e5] font-hud text-[10px] font-bold">
+                      📋 COPY RECEIPT
+                    </button>
+                    <button type="button" onclick="selectStage(7)" class="btn-cyan px-4 py-1.5 rounded-lg font-hud text-[10px] uppercase">
+                      NEXT: STAGE 07 →
+                    </button>
                   </div>
                 </div>
               ` : ''}
             </div>
 
-            <!-- Change Scanner Tool -->
+            <!-- Right: Tactical Change Scanner -->
             <div class="lg:col-span-5 p-5 rounded-2xl bg-[#07162b] border border-[#ff526b]/35 space-y-4">
-              <div class="font-hud text-xs font-bold uppercase text-[#ff526b]">🧮 TACTICAL CHANGE SCANNER</div>
+              <div class="font-hud text-xs font-bold uppercase text-[#ff526b]">
+                ${currentLang === 'en' ? 'TACTICAL CHANGE SCANNER' : 'PENGIMBAS BAKI TAKTIKAL'}
+              </div>
               <div class="space-y-3">
                 <div>
-                  <label class="block text-xs text-[#8fb2d4] mb-1">${currentLang === 'en' ? 'Amount Paid (RM)' : 'Wang Dibayar (RM)'}</label>
-                  <input id="marketCalcPaidInput" type="number" step="0.05" value="${marketCalcPaid}" class="w-full px-4 py-2.5 rounded-xl bg-[#0c203b] border border-white/15 font-hud text-white font-bold" />
+                  <label class="block text-[11px] font-hud text-[#8fb2d4] mb-1">${currentLang === 'en' ? 'AMOUNT PAID (RM)' : 'WANG DIBAYAR (RM)'}</label>
+                  <input id="marketCalcPaidInput" type="number" step="0.05" min="0" value="${marketCalcPaid}"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-[#0c203b] border border-white/15 font-hud text-white text-sm" />
                 </div>
                 <div>
-                  <label class="block text-xs text-[#8fb2d4] mb-1">${currentLang === 'en' ? 'Item Price (RM)' : 'Harga Barang (RM)'}</label>
-                  <input id="marketCalcPriceInput" type="number" step="0.05" value="${marketCalcPrice}" class="w-full px-4 py-2.5 rounded-xl bg-[#0c203b] border border-white/15 font-hud text-white font-bold" />
+                  <label class="block text-[11px] font-hud text-[#8fb2d4] mb-1">${currentLang === 'en' ? 'ITEM PRICE (RM)' : 'HARGA BARANG (RM)'}</label>
+                  <input id="marketCalcPriceInput" type="number" step="0.05" min="0" value="${marketCalcPrice}"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-[#0c203b] border border-white/15 font-hud text-white text-sm" />
                 </div>
-                <button type="button" onclick="calculateStage6ChangeScanner()" class="btn-cyan w-full py-3 rounded-xl font-hud text-xs uppercase">
-                  ${currentLang === 'en' ? 'SCAN CHANGE' : 'IMBAS BAKI'}
+                <button type="button" onclick="calculateStage6ChangeScanner()" class="w-full py-2.5 rounded-xl bg-[#ff526b] hover:bg-[#ff6b80] text-white font-hud text-xs font-extrabold uppercase">
+                  🧮 ${currentLang === 'en' ? 'SCAN CHANGE' : 'IMBAS BAKI'}
                 </button>
-                <div class="p-4 rounded-xl bg-[#0c203b] border border-white/10 text-center">
-                  <div class="text-[10px] font-hud text-[#8fb2d4]">CHANGE DUE</div>
-                  <div class="font-hud text-2xl font-black mt-1 ${marketCalcIsShort ? 'text-[#ff526b]' : 'text-[#34d399]'}">
+                <div class="p-4 rounded-xl bg-[#0c203b] border border-[#21d4e5]/30 text-center">
+                  <div class="text-[10px] font-hud text-[#8fb2d4]">${currentLang === 'en' ? 'CHANGE DUE' : 'BAKI WANG'}</div>
+                  <div class="font-hud text-2xl font-black ${marketCalcIsShort ? 'text-[#ff526b]' : 'text-[#21d4e5]'} mt-1">
                     ${marketCalcResultText}
                   </div>
                 </div>
@@ -2133,104 +2171,100 @@
     }
 
     function downloadMataCertificatePng() {
+      const allMissionsCompleted = completedStages.slice(0, 7).every(Boolean);
+      if (!allMissionsCompleted) {
+        playMataSfx('wrong');
+        showToast(
+          currentLang === 'en' ? 'CERTIFICATE LOCKED' : 'SIJIL DIKUNCI',
+          currentLang === 'en'
+            ? 'Complete all 7 missions with zero incomplete stages to unlock your certificate!'
+            : 'Lengkapkan kesemua 7 misi tanpa sebarang misi tidak lengkap untuk membuka sijil anda!',
+          '🔒'
+        );
+        return;
+      }
+
       const doneCount = completedStages.filter(Boolean).length;
       const rank = getCurrentRankInfo();
       const gradeInfo = getOverallAgentGrade();
-      const dateStr = new Date().toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' });
+      const issuedDate = new Date().toLocaleDateString('en-MY', { year: 'numeric', month: 'long', day: 'numeric' });
 
       const canvas = document.createElement('canvas');
       canvas.width = 1200;
-      canvas.height = 820;
+      canvas.height = 800;
       const ctx = canvas.getContext('2d');
 
-      const grad = ctx.createLinearGradient(0, 0, 1200, 820);
-      grad.addColorStop(0, '#07162b');
-      grad.addColorStop(0.5, '#0d2544');
-      grad.addColorStop(1, '#07162b');
+      const grad = ctx.createLinearGradient(0, 0, 1200, 800);
+      grad.addColorStop(0, '#061121');
+      grad.addColorStop(0.5, '#0c2342');
+      grad.addColorStop(1, '#061121');
       ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 1200, 820);
+      ctx.fillRect(0, 0, 1200, 800);
 
       ctx.strokeStyle = '#ffdf59';
-      ctx.lineWidth = 8;
-      ctx.strokeRect(28, 28, 1144, 764);
-
+      ctx.lineWidth = 10;
+      ctx.strokeRect(36, 36, 1128, 728);
       ctx.strokeStyle = '#21d4e5';
       ctx.lineWidth = 3;
-      ctx.strokeRect(46, 46, 1108, 728);
+      ctx.strokeRect(54, 54, 1092, 692);
 
-      ctx.fillStyle = '#21d4e5';
-      ctx.font = 'bold 26px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('M.A.T.A ACADEMY • CYBERAYA FINANCIAL OPERATIONS', 600, 115);
+      ctx.fillStyle = '#21d4e5';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText('M.A.T.A ACADEMY CYBERAYA • STANDARD 3.1', 600, 130);
 
       ctx.fillStyle = '#ffdf59';
-      ctx.font = '900 52px sans-serif';
-      ctx.fillText('OFFICIAL AGENT CERTIFICATE', 600, 185);
+      ctx.font = '900 44px sans-serif';
+      ctx.fillText('M.A.T.A AGENT CERTIFICATE OF ACHIEVEMENT', 600, 210);
 
-      ctx.fillStyle = '#8fb2d4';
+      ctx.fillStyle = '#cbd5e1';
       ctx.font = '24px sans-serif';
-      ctx.fillText('This certifies that operative', 600, 250);
+      ctx.fillText('This official credential is awarded to', 600, 285);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 58px sans-serif';
-      ctx.fillText(agentName || 'EJEN ALI', 600, 330);
+      ctx.font = '900 54px sans-serif';
+      ctx.fillText(agentName, 600, 365);
 
       ctx.strokeStyle = '#34d399';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(280, 355);
-      ctx.lineTo(920, 355);
+      ctx.moveTo(320, 392);
+      ctx.lineTo(880, 392);
       ctx.stroke();
 
-      ctx.fillStyle = '#e6f4ff';
-      ctx.font = '24px sans-serif';
-      ctx.fillText('has completed the 8-Stage Ejen Ali Financial Simulation', 600, 415);
-      ctx.fillText('(Operasi Asas Tambah Wang & Pengurusan Kewangan)', 600, 452);
-
-      const stats = [
-        { label: 'AGENT RANK', val: rank.code, color: '#34d399', x: 260 },
-        { label: 'FINAL GRADE', val: `GRADE ${gradeInfo.grade}`, color: '#ffdf59', x: 600 },
-        { label: 'TOTAL SCORE', val: `${totalXP} XP (${doneCount}/8)`, color: '#21d4e5', x: 940 }
-      ];
-      stats.forEach(st => {
-        ctx.fillStyle = 'rgba(7, 22, 43, 0.9)';
-        ctx.fillRect(st.x - 140, 500, 280, 120);
-        ctx.strokeStyle = st.color;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(st.x - 140, 500, 280, 120);
-
-        ctx.fillStyle = '#8fb2d4';
-        ctx.font = 'bold 18px sans-serif';
-        ctx.fillText(st.label, st.x, 540);
-
-        ctx.fillStyle = st.color;
-        ctx.font = '900 32px sans-serif';
-        ctx.fillText(st.val, st.x, 588);
-      });
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '25px sans-serif';
+      ctx.fillText(`Completed ${doneCount}/8 Financial Simulation Operations`, 600, 455);
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.fillText(`${rank.code} (${rank.labelEn})  •  GRADE ${gradeInfo.grade}  •  ${totalXP} XP`, 600, 515);
 
       ctx.fillStyle = '#8fb2d4';
       ctx.font = '20px sans-serif';
-      ctx.fillText(`Issued on: ${dateStr}`, 300, 715);
-      ctx.fillText('Authorized by: I.R.I.S. AI & M.A.T.A High Command', 840, 715);
+      ctx.fillText(`Issued Date: ${issuedDate}   |   Verified by I.R.I.S. AI`, 600, 670);
 
       const link = document.createElement('a');
-      link.download = `MATA_Agent_Certificate_${(agentName || 'EJEN_ALI').replace(/\s+/g, '_')}.png`;
+      link.download = `MATA_Agent_Certificate_${agentName.replace(/\s+/g, '_')}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
       playMataSfx('celebration');
-      showToast("CERTIFICATE DOWNLOADED", "Your M.A.T.A Agent Certificate (PNG) has been saved!", "📜");
     }
 
     function renderStage8FinalRank(box) {
       const priorCompletedCount = completedStages.slice(0, 7).filter(Boolean).length;
-      if (priorCompletedCount === 7 && !completedStages[7]) {
+      const hasIncompleteMission = priorCompletedCount < 7 || incompleteStages.slice(0, 7).some(Boolean);
+      const missingMissions = stageMeta
+        .slice(0, 7)
+        .filter((_, idx) => !completedStages[idx]);
+
+      if (!hasIncompleteMission && !completedStages[7]) {
         completeStage(8, 250);
       }
 
       const doneCount = completedStages.filter(Boolean).length;
       const rank = getCurrentRankInfo();
       const gradeInfo = getOverallAgentGrade();
-      const isPassing = gradeInfo.isFlyingColours;
+      const isPassing = !hasIncompleteMission && gradeInfo.isFlyingColours;
       const issuedDate = new Date().toLocaleDateString(currentLang === 'en' ? 'en-MY' : 'ms-MY', {
         year: 'numeric',
         month: 'long',
@@ -2249,14 +2283,14 @@
                 </h2>
               </div>
             </div>
-            <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${doneCount === 8 ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
+            <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${!hasIncompleteMission ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ff526b]/20 text-[#ff526b] border border-[#ff526b]/50'}">
               ${doneCount} / 8 ${currentLang === 'en' ? 'STAGES COMPLETED' : 'MISI SELESAI'}
             </span>
           </div>
 
-          <div class="final-banner-enter rounded-2xl p-6 sm:p-8 text-center border-2 ${isPassing ? 'bg-gradient-to-br from-[#0e3447] via-[#0b233d] to-[#1d2b16] border-[#34d399]' : 'bg-gradient-to-br from-[#102641] via-[#0b1d36] to-[#261428] border-[#ffdf59]'} space-y-4 shadow-2xl">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#07162b]/90 border border-white/15 font-hud text-xs font-extrabold uppercase tracking-widest ${isPassing ? 'text-[#34d399]' : 'text-[#ffdf59]'}">
-              <span>${isPassing ? '🎉 M.A.T.A COMMENDATION' : '💪 ACADEMY TRAINING REPORT'}</span>
+          <div class="final-banner-enter rounded-2xl p-6 sm:p-8 text-center border-2 ${isPassing ? 'bg-gradient-to-br from-[#0e3447] via-[#0b233d] to-[#1d2b16] border-[#34d399]' : 'bg-gradient-to-br from-[#2b0f1b] via-[#13172e] to-[#0b1d36] border-[#ff526b]'} space-y-4 shadow-2xl">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#07162b]/90 border border-white/15 font-hud text-xs font-extrabold uppercase tracking-widest ${isPassing ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+              <span>${isPassing ? '🎉 M.A.T.A COMMENDATION' : '⚠️ INCOMPLETE MISSION CLEARANCE'}</span>
               <span>•</span>
               <span>AGENT: ${escapeHtmlText(agentName)}</span>
             </div>
@@ -2264,7 +2298,7 @@
             <h3 class="font-hud text-2xl sm:text-4xl font-black tracking-wide ${isPassing ? 'text-[#ffdf59]' : 'text-white'}">
               ${isPassing
                 ? (currentLang === 'en' ? 'CONGRATULATIONS! YOU PASSED WITH FLYING COLOURS!' : 'TAHNIAH! ANDA LULUS DENGAN CEMERLANG!')
-                : (currentLang === 'en' ? "DON'T GIVE UP, AGENT! KEEP PRACTISING!" : 'JANGAN BERPUTUS ASA, EJEN! TERUSKAN BERLATIH!')}
+                : (currentLang === 'en' ? 'CERTIFICATE LOCKED — INCOMPLETE MISSIONS DETECTED!' : 'SIJIL DIKUNCI — TERDAPAT MISI TIDAK LENGKAP!')}
             </h3>
 
             <p class="text-sm sm:text-base text-slate-200 max-w-2xl mx-auto leading-relaxed">
@@ -2273,8 +2307,8 @@
                     ? `Outstanding financial precision across Cyberaya Operations! You completed ${doneCount}/8 stages with ${totalXP} XP.`
                     : `Ketepatan kewangan yang cemerlang dalam Operasi Cyberaya! Anda melengkapkan ${doneCount}/8 misi dengan ${totalXP} XP.`)
                 : (currentLang === 'en'
-                    ? `You have completed ${doneCount}/8 stages (${totalXP} XP). Complete all 7 prior stages to unlock SUPREME AGENT (RANK S) and Grade A!`
-                    : `Anda telah melengkapkan ${doneCount}/8 misi (${totalXP} XP). Lengkapkan semua 7 misi terdahulu untuk membuka RANK S dan Gred A!`)}
+                    ? `You have ${missingMissions.length} incomplete mission(s). Complete all 7 stages with zero incomplete missions to receive your official M.A.T.A Agent Certificate!`
+                    : `Anda mempunyai ${missingMissions.length} misi yang belum lengkap. Lengkapkan kesemua 7 peringkat tanpa sebarang misi tidak lengkap untuk menerima Sijil Ejen M.A.T.A rasmi anda!`)}
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-2">
@@ -2317,50 +2351,75 @@
 
             ${renderEjenAliSquadAnimation()}
 
-            <!-- Printable / Downloadable M.A.T.A Agent Certificate -->
-            <div id="mataCertificateCard" class="max-w-3xl mx-auto mt-6 rounded-2xl bg-gradient-to-br from-[#061326] via-[#0c2240] to-[#061326] border-4 border-double border-[#ffdf59] p-6 sm:p-8 text-center space-y-4 shadow-2xl relative overflow-hidden">
-              <div class="flex items-center justify-between text-[10px] font-hud font-bold uppercase tracking-widest text-[#21d4e5]">
-                <span>M.A.T.A ACADEMY CYBERAYA</span>
-                <span>CERT-ID: MATA-${totalXP}-${doneCount}08</span>
-              </div>
-              <div class="space-y-1">
-                <div class="text-3xl">🎖️</div>
-                <h4 class="font-hud text-xl sm:text-3xl font-black text-[#ffdf59] tracking-wider uppercase">
-                  ${currentLang === 'en' ? 'M.A.T.A AGENT CERTIFICATE OF ACHIEVEMENT' : 'SIJIL PENCAPAIAN EJEN AKADEMI M.A.T.A'}
-                </h4>
-                <p class="text-xs text-[#8fb2d4]">
-                  ${currentLang === 'en' ? 'This official credential is awarded to' : 'Sijil rasmi ini dianugerahkan kepada'}
+            ${!hasIncompleteMission ? `
+              <!-- Printable / Downloadable M.A.T.A Agent Certificate (Unlocked only when 0 incomplete missions) -->
+              <div id="mataCertificateCard" class="max-w-3xl mx-auto mt-6 rounded-2xl bg-gradient-to-br from-[#061326] via-[#0c2240] to-[#061326] border-4 border-double border-[#ffdf59] p-6 sm:p-8 text-center space-y-4 shadow-2xl relative overflow-hidden">
+                <div class="flex items-center justify-between text-[10px] font-hud font-bold uppercase tracking-widest text-[#21d4e5]">
+                  <span>M.A.T.A ACADEMY CYBERAYA</span>
+                  <span>CERT-ID: MATA-${totalXP}-${doneCount}08</span>
+                </div>
+                <div class="space-y-1">
+                  <div class="text-3xl">🎖️</div>
+                  <h4 class="font-hud text-xl sm:text-3xl font-black text-[#ffdf59] tracking-wider uppercase">
+                    ${currentLang === 'en' ? 'M.A.T.A AGENT CERTIFICATE OF ACHIEVEMENT' : 'SIJIL PENCAPAIAN EJEN AKADEMI M.A.T.A'}
+                  </h4>
+                  <p class="text-xs text-[#8fb2d4]">
+                    ${currentLang === 'en' ? 'This official credential is awarded to' : 'Sijil rasmi ini dianugerahkan kepada'}
+                  </p>
+                </div>
+                <div class="py-2 border-y border-[#34d399]/40 max-w-md mx-auto">
+                  <div class="font-hud text-2xl sm:text-3xl font-black text-white tracking-wide">
+                    ${escapeHtmlText(agentName)}
+                  </div>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-200 max-w-xl mx-auto">
+                  ${currentLang === 'en'
+                    ? `For completing ${doneCount}/8 Financial Simulation Operations with Rank ${rank.code} (${rank.labelEn}), Grade ${gradeInfo.grade}, and ${totalXP} XP.`
+                    : `Kerana melengkapkan ${doneCount}/8 Operasi Simulasi Kewangan dengan Pangkat ${rank.code} (${rank.labelBm}), Gred ${gradeInfo.grade}, dan ${totalXP} XP.`}
                 </p>
-              </div>
-              <div class="py-2 border-y border-[#34d399]/40 max-w-md mx-auto">
-                <div class="font-hud text-2xl sm:text-3xl font-black text-white tracking-wide">
-                  ${escapeHtmlText(agentName)}
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-3 text-[11px] font-hud text-[#8fb2d4] border-t border-white/10">
+                  <span>${currentLang === 'en' ? 'DATE' : 'TARIKH'}: ${issuedDate}</span>
+                  <span class="text-[#34d399] font-bold">✓ VERIFIED BY I.R.I.S. AI</span>
+                </div>
+
+                <div class="no-print-cert flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button type="button" onclick="downloadMataCertificatePng()" class="btn-mint px-5 py-2.5 rounded-xl font-hud text-xs uppercase tracking-wider">
+                    ⬇️ ${currentLang === 'en' ? 'Download Certificate (PNG)' : 'Muat Turun Sijil (PNG)'}
+                  </button>
+                  <button type="button" onclick="window.print()" class="btn-cyan px-5 py-2.5 rounded-xl font-hud text-xs uppercase tracking-wider">
+                    🖨️ ${currentLang === 'en' ? 'Print / Save PDF' : 'Cetak / Simpan PDF'}
+                  </button>
                 </div>
               </div>
-              <p class="text-xs sm:text-sm text-slate-200 max-w-xl mx-auto">
-                ${currentLang === 'en'
-                  ? `For completing ${doneCount}/8 Financial Simulation Operations with Rank ${rank.code} (${rank.labelEn}), Grade ${gradeInfo.grade}, and ${totalXP} XP.`
-                  : `Kerana melengkapkan ${doneCount}/8 Operasi Simulasi Kewangan dengan Pangkat ${rank.code} (${rank.labelBm}), Gred ${gradeInfo.grade}, dan ${totalXP} XP.`}
-              </p>
-              <div class="flex flex-wrap items-center justify-between gap-2 pt-3 text-[11px] font-hud text-[#8fb2d4] border-t border-white/10">
-                <span>${currentLang === 'en' ? 'DATE' : 'TARIKH'}: ${issuedDate}</span>
-                <span class="text-[#34d399] font-bold">✓ VERIFIED BY I.R.I.S. AI</span>
+            ` : `
+              <!-- Locked Certificate Notice when >= 1 mission is incomplete -->
+              <div class="max-w-3xl mx-auto mt-6 rounded-2xl bg-[#07162b]/95 border-2 border-[#ff526b] p-6 sm:p-8 text-center space-y-4 shadow-2xl">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-[#ff526b]/20 border border-[#ff526b] flex items-center justify-center text-3xl">
+                  🔒
+                </div>
+                <h4 class="font-hud text-lg sm:text-2xl font-black text-[#ff526b] uppercase">
+                  ${currentLang === 'en' ? 'NO CERTIFICATE ISSUED — INCOMPLETE MISSIONS' : 'TIADA SIJIL DIKELUARKAN — MISI TIDAK LENGKAP'}
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-200 max-w-xl mx-auto leading-relaxed">
+                  ${currentLang === 'en'
+                    ? 'Every M.A.T.A Agent must complete all 7 missions without any incomplete stages before receiving their official certificate. Click any incomplete mission below to finish it now:'
+                    : 'Setiap Ejen M.A.T.A mesti melengkapkan kesemua 7 misi tanpa sebarang peringkat yang tidak lengkap sebelum menerima sijil rasmi. Klik mana-mana misi belum lengkap di bawah untuk menyelesaikannya:'}
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                  ${missingMissions.map(st => `
+                    <button type="button" onclick="selectStage(${st.id})"
+                      class="px-3.5 py-2 rounded-xl bg-[#ff526b]/20 hover:bg-[#ff526b]/35 border border-[#ff526b] text-[#ff8fa0] font-hud text-xs font-bold transition cursor-pointer">
+                      ✕ ${currentLang === 'en' ? st.titleEn : st.titleBm} →
+                    </button>
+                  `).join('')}
+                </div>
               </div>
-
-              <div class="no-print-cert flex flex-wrap items-center justify-center gap-3 pt-2">
-                <button type="button" onclick="downloadMataCertificatePng()" class="btn-mint px-5 py-2.5 rounded-xl font-hud text-xs uppercase tracking-wider">
-                  ⬇️ ${currentLang === 'en' ? 'Download Certificate (PNG)' : 'Muat Turun Sijil (PNG)'}
-                </button>
-                <button type="button" onclick="window.print()" class="btn-cyan px-5 py-2.5 rounded-xl font-hud text-xs uppercase tracking-wider">
-                  🖨️ ${currentLang === 'en' ? 'Print / Save PDF' : 'Cetak / Simpan PDF'}
-                </button>
-              </div>
-            </div>
+            `}
 
             <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
-              ${doneCount < 8 ? `
-                <button type="button" onclick="selectStage(completedStages.findIndex(v => !v) + 1)" class="btn-cyan px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
-                  ${currentLang === 'en' ? 'Go To Next Incomplete Stage →' : 'Pergi Ke Misi Belum Selesai →'}
+              ${hasIncompleteMission ? `
+                <button type="button" onclick="selectStage(${missingMissions[0].id})" class="btn-cyan px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                  ${currentLang === 'en' ? 'Complete Remaining Missions →' : 'Lengkapkan Misi Yang Tinggal →'}
                 </button>
               ` : ''}
               <button type="button" onclick="resetFullMission()" class="btn-yellow px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
