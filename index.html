@@ -66,12 +66,10 @@
       border-color: rgba(52, 211, 153, 0.55);
     }
 
-    .btn-cyan {
-      background: linear-gradient(180deg, #33e0f0 0%, #19b6c7 100%);
-      color: #041322;
-      font-weight: 800;
-      box-shadow: 0 4px 16px rgba(33, 212, 229, 0.3);
-      transition: all 0.16s ease;
+    .stage-card.incomplete {
+      border-color: #ff526b;
+      background: linear-gradient(145deg, rgba(68, 16, 30, 0.92), rgba(32, 10, 18, 0.96));
+      box-shadow: 0 0 18px rgba(255, 82, 107, 0.24);
     }
     .btn-cyan:hover {
       filter: brightness(1.08);
@@ -490,7 +488,7 @@
     let totalXP = 0;
     let agentName = "EJEN ALI";
     let completedStages = [false, false, false, false, false, false, false, false];
-
+    let incompleteStages = [false, false, false, false, false, false, false, false];
     const stageMeta = [
       { id: 1, icon: "🚀", titleEn: "1. Briefing", titleBm: "1. Taklimat", subEn: "Agent Login", subBm: "Log Masuk Ejen" },
       { id: 2, icon: "💵", titleEn: "2. Money ID", titleBm: "2. Kenal Wang", subEn: "RM & Sen", subBm: "RM & Sen" },
@@ -524,7 +522,7 @@
     let gadgetTimeLeft = 60;
     let gadgetTimerInterval = null;
     let gadgetTimerExpired = false;
-
+    let gadgetAbandoned = false;
     // --- MISSION 5 (IRIS Protocol: 3 Missions, Pass >= 2/3, Empty Inputs) ---
     let m5RoundMissions = [];
     let m5Index = 0;
@@ -800,15 +798,18 @@
       const grid = document.getElementById('stagesGrid');
       grid.innerHTML = stageMeta.map((st, idx) => {
         const isDone = completedStages[idx];
+        const isIncomplete = !isDone && incompleteStages[idx];
         const isActive = activeStage === st.id;
         return `
           <button type="button" onclick="selectStage(${st.id})"
-            class="stage-card ${isActive ? 'active' : ''} ${isDone ? 'completed' : ''} rounded-2xl p-4 text-left flex flex-col justify-between gap-2 cursor-pointer">
+            class="stage-card ${isActive ? 'active' : ''} ${isDone ? 'completed' : ''} ${isIncomplete ? 'incomplete' : ''} rounded-2xl p-4 text-left flex flex-col justify-between gap-2 cursor-pointer">
             <div class="flex items-center justify-between w-full">
               <span class="text-2xl">${st.icon}</span>
               ${isDone
                 ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-hud font-bold bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40">✓ DONE</span>`
-                : `<span class="font-hud text-[10px] font-bold text-[#8fb2d4]">0${st.id}</span>`}
+                : isIncomplete
+                  ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-hud font-bold bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]/60">✕ INCOMPLETE</span>`
+                  : `<span class="font-hud text-[10px] font-bold text-[#8fb2d4]">0${st.id}</span>`}
             </div>
             <div>
               <div class="font-hud text-xs sm:text-sm font-extrabold text-white">
@@ -823,13 +824,45 @@
       }).join('');
     }
 
-    function selectStage(stageId) {
-      if (activeStage === 4 && stageId !== 4) {
-        stopGadgetLabTimer();
+    function markStageIncomplete(stageId, reasonMsg) {
+      const idx = stageId - 1;
+      if (!completedStages[idx]) {
+        incompleteStages[idx] = true;
+        renderStagesGrid();
+        if (reasonMsg) {
+          showToast(
+            currentLang === 'en' ? `STAGE 0${stageId} INCOMPLETE` : `MISI 0${stageId} TIDAK LENGKAP`,
+            reasonMsg,
+            "⚠️"
+          );
+        }
       }
+    }
+
+    function selectStage(stageId) {
+      if (activeStage !== stageId) {
+        if (activeStage === 4) {
+          stopGadgetLabTimer();
+          if (!completedStages[3]) {
+            gadgetAbandoned = true;
+            markStageIncomplete(
+              4,
+              currentLang === 'en'
+                ? 'Gadget Lab timer stopped! Retake Stage 04 to complete it.'
+                : 'Pemasa Makmal Gajet dihentikan! Ambil semula Misi 04 untuk melengkapkannya.'
+            );
+          }
+        } else if (!completedStages[activeStage - 1]) {
+          // Mark any other uncompleted stage as incomplete when leaving it
+          markStageIncomplete(activeStage);
+        }
+      }
+
       activeStage = stageId;
       if (stageId === 4) {
-        startGadgetLabTimer();
+        if (!gadgetAbandoned && !gadgetTimerExpired && !completedStages[3]) {
+          startGadgetLabTimer();
+        }
       }
       renderStagesGrid();
       renderActiveStageWorkspace();
@@ -838,6 +871,7 @@
 
     function completeStage(stageId, xpReward = 150) {
       const idx = stageId - 1;
+      incompleteStages[idx] = false;
       if (!completedStages[idx]) {
         completedStages[idx] = true;
         totalXP += xpReward;
@@ -1115,6 +1149,7 @@
       } else {
         m2RoundComplete = true;
         if (m2Score >= 3) completeStage(2, 150);
+        else markStageIncomplete(2);
       }
       renderActiveStageWorkspace();
     }
@@ -1238,6 +1273,7 @@
       } else {
         m3RoundComplete = true;
         if (m3Score >= 3) completeStage(3, 150);
+        else markStageIncomplete(3);
       }
       renderActiveStageWorkspace();
     }
@@ -1262,7 +1298,7 @@
           stopGadgetLabTimer();
           return;
         }
-        if (gadgetTimeLeft > 0 && !gadgetTimerExpired) {
+        if (gadgetTimeLeft > 0 && !gadgetTimerExpired && !gadgetAbandoned) {
           gadgetTimeLeft--;
           const timerEl = document.getElementById('gadgetLabTimerText');
           if (timerEl) timerEl.textContent = `${gadgetTimeLeft}s`;
@@ -1270,6 +1306,7 @@
             gadgetTimerExpired = true;
             stopGadgetLabTimer();
             playMataSfx('wrong');
+            markStageIncomplete(4);
             renderActiveStageWorkspace();
           }
         }
@@ -1287,7 +1324,8 @@
       const totalVal = gadgetLabItems.reduce((acc, v) => acc + v, 0);
       const totalCents = Math.round(totalVal * 100);
       const targetCents = Math.round(gadgetTargetAmount * 100);
-      const isTargetMatched = totalCents === targetCents && !gadgetTimerExpired;
+      const isLockedOut = gadgetTimerExpired || gadgetAbandoned;
+      const isTargetMatched = totalCents === targetCents && !isLockedOut;
 
       if (isTargetMatched && !completedStages[3]) {
         stopGadgetLabTimer();
@@ -1312,11 +1350,11 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${gadgetTimeLeft <= 15 ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#21d4e5]/20 text-[#21d4e5] border border-[#21d4e5]/40'}">
-                ⏱ <span id="gadgetLabTimerText">${gadgetTimeLeft}s</span>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${isLockedOut || gadgetTimeLeft <= 15 ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#21d4e5]/20 text-[#21d4e5] border border-[#21d4e5]/40'}">
+                ⏱ <span id="gadgetLabTimerText">${isLockedOut ? 'STOPPED' : `${gadgetTimeLeft}s`}</span>
               </span>
-              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${completedStages[3] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
-                ${completedStages[3] ? '✓ COMPLETED' : `TARGET: RM ${gadgetTargetAmount.toFixed(2)}`}
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${completedStages[3] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : isLockedOut ? 'bg-[#ff526b]/25 text-[#ff526b] border border-[#ff526b]' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
+                ${completedStages[3] ? '✓ COMPLETED' : isLockedOut ? '✕ INCOMPLETE' : `TARGET: RM ${gadgetTargetAmount.toFixed(2)}`}
               </span>
             </div>
           </div>
@@ -1328,12 +1366,12 @@
               </div>
               <p class="text-xs sm:text-sm text-slate-200 mt-0.5">
                 ${currentLang === 'en'
-                  ? `Tap notes & coins below to scan an exact total of RM ${gadgetTargetAmount.toFixed(2)} before the 60s timer runs out!`
-                  : `Ketik wang kertas & syiling di bawah untuk mengimbas jumlah tepat RM ${gadgetTargetAmount.toFixed(2)} sebelum masa 60s tamat!`}
+                  ? `Tap notes & coins below to scan an exact total of RM ${gadgetTargetAmount.toFixed(2)} before the 60s timer runs out! (Leaving this mission stops the timer)`
+                  : `Ketik wang kertas & syiling di bawah untuk mengimbas jumlah tepat RM ${gadgetTargetAmount.toFixed(2)} sebelum masa 60s tamat! (Meninggalkan misi ini akan menghentikan pemasa)`}
               </p>
             </div>
             <button type="button" onclick="retakeStage4GadgetLab()" class="btn-yellow px-4 py-2 rounded-xl font-hud text-xs uppercase">
-              🔄 ${currentLang === 'en' ? 'NEW TARGET & RESET' : 'SASARAN BAHARU'}
+              🔄 ${currentLang === 'en' ? 'RETAKE / NEW TARGET' : 'AMBIL SEMULA / SASARAN BAHARU'}
             </button>
           </div>
 
@@ -1344,22 +1382,22 @@
               </div>
               <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
                 ${gadgetScannerDenominations.map(item => `
-                  <button type="button" ${gadgetTimerExpired ? 'disabled' : ''} onclick="addGadgetLabItem(${item.value})"
+                  <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="addGadgetLabItem(${item.value})"
                     class="p-3 rounded-xl border font-hud text-xs sm:text-sm font-extrabold transition ${
                       item.isCoin
                         ? 'bg-[#ffdf59]/15 hover:bg-[#ffdf59]/30 border-[#ffdf59]/50 text-[#ffdf59]'
                         : 'bg-[#21d4e5]/15 hover:bg-[#21d4e5]/30 border-[#21d4e5]/50 text-[#21d4e5]'
-                    } ${gadgetTimerExpired ? 'opacity-45 cursor-not-allowed' : ''}">
+                    } ${isLockedOut ? 'opacity-45 cursor-not-allowed' : ''}">
                     + ${item.label}
                   </button>
                 `).join('')}
               </div>
 
               <div class="flex flex-wrap gap-2 pt-2">
-                <button type="button" onclick="resetGadgetLabScanner()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-hud font-bold text-slate-200">
+                <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="resetGadgetLabScanner()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-hud font-bold text-slate-200 ${isLockedOut ? 'opacity-45 cursor-not-allowed' : ''}">
                   CLEAR SCANNER
                 </button>
-                <button type="button" onclick="randomGadgetLabSample()" class="px-4 py-2 rounded-xl bg-[#21d4e5]/15 hover:bg-[#21d4e5]/25 border border-[#21d4e5]/40 text-xs font-hud font-bold text-[#21d4e5]">
+                <button type="button" ${isLockedOut ? 'disabled' : ''} onclick="randomGadgetLabSample()" class="px-4 py-2 rounded-xl bg-[#21d4e5]/15 hover:bg-[#21d4e5]/25 border border-[#21d4e5]/40 text-xs font-hud font-bold text-[#21d4e5] ${isLockedOut ? 'opacity-45 cursor-not-allowed' : ''}">
                   AUTO SAMPLE
                 </button>
               </div>
@@ -1393,11 +1431,15 @@
                     PROCEED TO STAGE 05: IRIS PROTOCOL →
                   </button>
                 </div>
-              ` : gadgetTimerExpired ? `
-                <div class="p-4 rounded-xl bg-[#ff526b]/20 border border-[#ff526b] text-center space-y-2">
-                  <div class="font-hud text-sm font-black text-[#ff526b]">⏱ TIME EXPIRED! TRY AGAIN</div>
+              ` : isLockedOut ? `
+                <div class="p-4 rounded-xl bg-[#ff526b]/20 border-2 border-[#ff526b] text-center space-y-2">
+                  <div class="font-hud text-sm font-black text-[#ff526b]">
+                    ${gadgetAbandoned
+                      ? (currentLang === 'en' ? '✕ MISSION INCOMPLETE — YOU LEFT THE GADGET LAB' : '✕ MISI TIDAK LENGKAP — ANDA KELUAR DARI MAKMAL GAJET')
+                      : (currentLang === 'en' ? '⏱ TIME EXPIRED — MISSION INCOMPLETE!' : '⏱ MASA TAMAT — MISI TIDAK LENGKAP!')}
+                  </div>
                   <button type="button" onclick="retakeStage4GadgetLab()" class="btn-yellow px-5 py-2.5 rounded-xl font-hud text-xs uppercase">
-                    RESTART 60S CHALLENGE
+                    🔄 ${currentLang === 'en' ? 'RETAKE GADGET LAB MISSION' : 'AMBIL SEMULA MISI MAKMAL GAJET'}
                   </button>
                 </div>
               ` : ''}
@@ -1408,17 +1450,20 @@
     }
 
     function addGadgetLabItem(val) {
+      if (gadgetTimerExpired || gadgetAbandoned) return;
       playMataSfx('scanner');
       gadgetLabItems.push(val);
       renderActiveStageWorkspace();
     }
 
     function resetGadgetLabScanner() {
+      if (gadgetTimerExpired || gadgetAbandoned) return;
       gadgetLabItems = [];
       renderActiveStageWorkspace();
     }
 
     function randomGadgetLabSample() {
+      if (gadgetTimerExpired || gadgetAbandoned) return;
       playMataSfx('scanner');
       gadgetLabItems = [];
       const count = 3 + Math.floor(Math.random() * 4);
@@ -1435,7 +1480,9 @@
       gadgetLabItems = [];
       gadgetTimeLeft = 60;
       gadgetTimerExpired = false;
+      gadgetAbandoned = false;
       startGadgetLabTimer();
+      renderStagesGrid();
       renderActiveStageWorkspace();
     }
 
@@ -1614,6 +1661,7 @@
       } else {
         m5RoundComplete = true;
         if (m5Score >= 2) completeStage(5, 150);
+        else markStageIncomplete(5);
       }
       renderActiveStageWorkspace();
     }
@@ -2027,6 +2075,8 @@
         m7RoundComplete = true;
         if (m7Score >= 6) {
           completeStage(7, 200);
+        } else {
+          markStageIncomplete(7);
         }
       }
       renderActiveStageWorkspace();
@@ -2079,61 +2129,7 @@
     }
 
     function renderStage8Medals() {
-      const medals = [
-        {
-          id: 'tekno',
-          icon: '⚙️',
-          title: 'TEKNO MEDAL',
-          descEn: 'Stages 1–2 Cleared',
-          descBm: 'Misi 1–2 Selesai',
-          unlocked: completedStages[0] && completedStages[1],
-          color: 'border-[#ff526b] text-[#ff526b]'
-        },
-        {
-          id: 'neuro',
-          icon: '🧠',
-          title: 'NEURO MEDAL',
-          descEn: 'Stages 3–4 Cleared',
-          descBm: 'Misi 3–4 Selesai',
-          unlocked: completedStages[2] && completedStages[3],
-          color: 'border-[#ffdf59] text-[#ffdf59]'
-        },
-        {
-          id: 'kombat',
-          icon: '🛡️',
-          title: 'KOMBAT MEDAL',
-          descEn: 'Stages 5–6 Cleared',
-          descBm: 'Misi 5–6 Selesai',
-          unlocked: completedStages[4] && completedStages[5],
-          color: 'border-[#38bdf8] text-[#38bdf8]'
-        },
-        {
-          id: 'inviso',
-          icon: '🏅',
-          title: 'SUPREME CREST',
-          descEn: 'All 8 Stages Mastered',
-          descBm: 'Semua 8 Misi Dikuasai',
-          unlocked: completedStages.filter(Boolean).length === 8,
-          color: 'border-[#34d399] text-[#34d399]'
-        }
-      ];
-
-      return `
-        <div class="pt-3">
-          <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#21d4e5] mb-3">
-            ${currentLang === 'en' ? 'M.A.T.A ACHIEVEMENT MEDALS' : 'PINGAT PENCAPAIAN AKADEMI M.A.T.A'}
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto">
-            ${medals.map(m => `
-              <div class="p-3.5 rounded-2xl border-2 ${m.unlocked ? `${m.color} bg-[#07162b]/95 medal-animated` : 'border-white/10 bg-[#07162b]/50 opacity-45 grayscale'} flex flex-col items-center text-center">
-                <div class="text-3xl mb-1">${m.unlocked ? m.icon : '🔒'}</div>
-                <div class="font-hud text-xs font-black tracking-wider">${m.title}</div>
-                <div class="text-[10px] text-[#8fb2d4] mt-0.5">${currentLang === 'en' ? m.descEn : m.descBm}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
+      return '';
     }
 
     function downloadMataCertificatePng() {
@@ -2320,7 +2316,6 @@
             </div>
 
             ${renderEjenAliSquadAnimation()}
-            ${renderStage8Medals()}
 
             <!-- Printable / Downloadable M.A.T.A Agent Certificate -->
             <div id="mataCertificateCard" class="max-w-3xl mx-auto mt-6 rounded-2xl bg-gradient-to-br from-[#061326] via-[#0c2240] to-[#061326] border-4 border-double border-[#ffdf59] p-6 sm:p-8 text-center space-y-4 shadow-2xl relative overflow-hidden">
@@ -2379,6 +2374,7 @@
 
     function resetFullMission() {
       completedStages = [false, false, false, false, false, false, false, false];
+      incompleteStages = [false, false, false, false, false, false, false, false];
       totalXP = 0;
       initMission2Round();
       initMission3Round();
@@ -2387,6 +2383,7 @@
       gadgetLabItems = [];
       gadgetTimeLeft = 60;
       gadgetTimerExpired = false;
+      gadgetAbandoned = false;
       marketSelectedIds = [1, 2];
       marketFeedbackMsg = null;
       marketGeneratedReceipt = null;
