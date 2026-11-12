@@ -1,0 +1,3051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>M.A.T.A Academy | Ejen Ali: Misi Simulasi (8-Stage Operations)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07162b;
+      --surface: #0c1f3a;
+      --panel: #102641;
+      --cyan: #21d4e5;
+      --mint: #34d399;
+      --yellow: #ffdf59;
+      --red: #ff526b;
+      --text: #e6f4ff;
+      --muted: #8fb2d4;
+    }
+
+    * {
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-image:
+        radial-gradient(circle at 12% 10%, rgba(33, 212, 229, 0.08) 0%, transparent 42%),
+        radial-gradient(circle at 88% 25%, rgba(255, 223, 89, 0.06) 0%, transparent 40%),
+        linear-gradient(rgba(33, 212, 229, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(33, 212, 229, 0.035) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+      overflow-x: hidden;
+    }
+
+    .font-hud {
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: 0.03em;
+    }
+
+    .mata-panel {
+      background: linear-gradient(165deg, rgba(16, 38, 65, 0.94) 0%, rgba(10, 27, 49, 0.97) 100%);
+      border: 1px solid rgba(33, 212, 229, 0.22);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+    }
+
+    /* 4x2 Mission Card Styling */
+    .stage-card {
+      background: linear-gradient(180deg, rgba(14, 34, 60, 0.92) 0%, rgba(10, 25, 45, 0.96) 100%);
+      border: 1.5px solid rgba(143, 178, 212, 0.18);
+      border-radius: 16px;
+      padding: 18px 14px;
+      transition: all 0.22s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 132px;
+      position: relative;
+    }
+    .stage-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(33, 212, 229, 0.55);
+      background: linear-gradient(180deg, rgba(19, 45, 79, 0.95) 0%, rgba(12, 31, 58, 0.98) 100%);
+    }
+    .stage-card.active-stage {
+      border: 2px solid #34d399;
+      background: linear-gradient(180deg, rgba(16, 46, 66, 0.96) 0%, rgba(10, 29, 48, 0.98) 100%);
+      box-shadow: 0 0 22px rgba(52, 211, 153, 0.22), inset 0 0 14px rgba(52, 211, 153, 0.08);
+    }
+    .stage-card.completed-stage:not(.active-stage) {
+      border-color: rgba(52, 211, 153, 0.45);
+    }
+    .stage-card.incomplete-stage:not(.active-stage) {
+      border-color: rgba(255, 82, 107, 0.55);
+    }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, #21d4e5 0%, #0ea5e9 100%);
+      color: #041324;
+      font-weight: 800;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(33, 212, 229, 0.35);
+    }
+    .btn-cyan:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(33, 212, 229, 0.55);
+    }
+
+    .btn-yellow {
+      background: linear-gradient(135deg, #ffdf59 0%, #f59e0b 100%);
+      color: #07162b;
+      font-weight: 800;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(255, 223, 89, 0.3);
+    }
+    .btn-yellow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 223, 89, 0.5);
+    }
+
+    .btn-mint {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+      color: #041c14;
+      font-weight: 800;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(52, 211, 153, 0.35);
+    }
+    .btn-mint:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(52, 211, 153, 0.55);
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, #ff526b 0%, #e11d48 100%);
+      color: #ffffff;
+      font-weight: 800;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(255, 82, 107, 0.35);
+    }
+    .btn-red:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 82, 107, 0.55);
+    }
+
+    /* Floating Comot Animation */
+    @keyframes floatBob {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .comot-float {
+      animation: floatBob 3.4s ease-in-out infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(33, 212, 229, 0.6); }
+      70% { box-shadow: 0 0 0 12px rgba(33, 212, 229, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(33, 212, 229, 0); }
+    }
+    .iris-pulse {
+      animation: pulseRing 2.2s infinite;
+    }
+
+    /* Ejen Ali Squad Character Animations for Stage 8 Banner */
+    @keyframes boomPopOut {
+      0% {
+        opacity: 0;
+        transform: scale(0.05) rotate(-18deg) translateY(45px);
+        filter: brightness(2.4) drop-shadow(0 0 28px #ffdf59);
+      }
+      55% {
+        opacity: 1;
+        transform: scale(1.24) rotate(5deg) translateY(-14px);
+        filter: brightness(1.35) drop-shadow(0 0 22px #21d4e5);
+      }
+      75% {
+        transform: scale(0.92) rotate(-3deg) translateY(4px);
+      }
+      90% {
+        transform: scale(1.06) rotate(1.5deg) translateY(-3px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg) translateY(0px);
+        filter: brightness(1);
+      }
+    }
+    @keyframes shockwaveRing {
+      0% {
+        opacity: 0.95;
+        transform: scale(0.2);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.85);
+      }
+    }
+    @keyframes squadBounce {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-9px) scale(1.04); }
+    }
+    @keyframes yoyoSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes bannerSlideGlow {
+      0% { opacity: 0; transform: scale(0.72) translateY(24px); }
+      65% { opacity: 1; transform: scale(1.03) translateY(-4px); }
+      100% { opacity: 1; transform: scale(1) translateY(0px); }
+    }
+    @keyframes confettiDrift {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 0.95; }
+      100% { transform: translateY(24px) rotate(180deg); opacity: 0.25; }
+    }
+    .squad-boom-card {
+      opacity: 0;
+      animation:
+        boomPopOut 0.68s cubic-bezier(0.22, 1.35, 0.36, 1) forwards,
+        squadBounce 2.5s ease-in-out 0.75s infinite;
+    }
+    .squad-delay-0 { animation-delay: 0.05s, 0.75s; }
+    .squad-delay-1 { animation-delay: 0.16s, 0.90s; }
+    .squad-delay-2 { animation-delay: 0.27s, 1.05s; }
+    .squad-delay-3 { animation-delay: 0.38s, 1.20s; }
+    .squad-delay-4 { animation-delay: 0.49s, 1.35s; }
+    .squad-delay-5 { animation-delay: 0.60s, 1.50s; }
+    .boom-ring {
+      animation: shockwaveRing 0.8s ease-out forwards;
+    }
+    .yoyo-spin {
+      transform-origin: center;
+      animation: yoyoSpin 3s linear infinite;
+    }
+    .final-banner-enter {
+      animation: bannerSlideGlow 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .confetti-spark {
+      animation: confettiDrift 2.4s ease-in-out infinite alternate;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #07162b; }
+    ::-webkit-scrollbar-thumb { background: #1e426e; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #21d4e5; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Toast Notification Banner (Replaces alert) -->
+  <div id="toastBanner" class="fixed top-20 right-4 z-50 max-w-sm transform translate-x-[120%] transition-transform duration-300 pointer-events-none">
+    <div id="toastInner" class="mata-panel border-l-4 border-[#34d399] rounded-xl p-4 shadow-2xl flex items-start gap-3">
+      <div id="toastIcon" class="text-xl mt-0.5">⚡</div>
+      <div>
+        <div id="toastTitle" class="font-hud text-xs font-bold uppercase text-[#34d399]">I.R.I.S. SYSTEM</div>
+        <div id="toastMsg" class="text-sm text-slate-100 mt-0.5">System message.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY TOP HUD BAR -->
+  <header class="sticky top-0 z-40 bg-[#07162b]/90 backdrop-blur-md border-b border-[#21d4e5]/25">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#21d4e5] to-[#0284c7] flex items-center justify-center shadow-lg shadow-[#21d4e5]/30 border border-white/30">
+          <svg class="w-6 h-6 text-[#07162b]" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 7l10 5 10-5-10-5zm0 7.5L4.5 6 12 2.5 19.5 6 12 9.5zm-10 4.5l10 5 10-5v2.5l-10 5-10-5V14zm0 4.5l10 5 10-5V21l-10 5-10-5v-2.5z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-hud font-extrabold text-base sm:text-lg tracking-wider text-white">M.A.T.A ACADEMY</span>
+            <span class="px-2 py-0.5 text-[11px] font-hud font-bold rounded-full bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40">OPS 03.1</span>
+          </div>
+          <p class="text-xs text-[#8fb2d4]" data-i18n="subtitle">Ejen Ali: Financial Simulation & Agent Roadmap</p>
+        </div>
+      </div>
+
+      <!-- Agent Rank, XP & Controls -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div class="flex items-center gap-2 bg-[#0c1f3a] px-3 py-1.5 rounded-xl border border-[#21d4e5]/30">
+          <span class="text-[11px] font-hud font-bold text-[#8fb2d4] uppercase">RANK:</span>
+          <span id="hudRankBadge" class="font-hud font-black text-xs sm:text-sm text-[#21d4e5]">E (CADET)</span>
+          <span class="text-white/20">|</span>
+          <span id="hudXpDisplay" class="font-hud font-bold text-xs sm:text-sm text-[#ffdf59]">0 XP</span>
+          <span class="hidden sm:inline text-white/20">|</span>
+          <span id="hudStageCounter" class="hidden sm:inline font-hud font-bold text-xs text-[#34d399]">0/8</span>
+        </div>
+
+        <a href="#missionRoadmapSection" class="px-3 py-2 rounded-xl bg-[#102641] hover:bg-[#18385e] text-[#21d4e5] border border-[#21d4e5]/30 text-xs font-bold flex items-center gap-1.5 transition">
+          <span>🗺️</span>
+          <span data-i18n="navRoadmap">8-Stage Map</span>
+        </a>
+
+        <button type="button" onclick="toggleComotChat(true)" class="px-3 py-2 rounded-xl bg-[#102641] hover:bg-[#18385e] text-[#21d4e5] border border-[#21d4e5]/30 text-xs font-bold hidden md:flex items-center gap-1.5 transition">
+          <span>🐱</span>
+          <span>Comot & I.R.I.S.</span>
+        </button>
+
+        <!-- Bilingual Toggle -->
+        <div class="flex items-center bg-[#0a1b31] p-1 rounded-xl border border-[#21d4e5]/30" role="group" aria-label="Language Switcher">
+          <button id="btnLangEN" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-lg text-xs font-hud font-bold transition bg-[#21d4e5] text-[#07162b]">EN</button>
+          <button id="btnLangBM" onclick="setLanguage('bm')" class="px-2.5 py-1 rounded-lg text-xs font-hud font-bold transition text-[#8fb2d4] hover:text-white">BM</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-7">
+
+    <!-- 8-STAGE MISSION ROADMAP & TOP PROGRESS BAR -->
+    <section id="missionRoadmapSection" class="space-y-4">
+      <!-- Top Horizontal Gradient Progress Bar -->
+      <div class="space-y-1.5">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="font-hud font-bold uppercase tracking-wider text-[#21d4e5]" data-i18n="roadmapHeader">M.A.T.A 8-STAGE MISSION ROADMAP</span>
+          <div class="flex items-center gap-3">
+            <span id="roadmapRankDisplay" class="font-hud font-bold text-[#21d4e5]">CURRENT RANK: RANK E (CADET)</span>
+            <span id="roadmapProgressLabel" class="font-hud font-bold text-[#ffdf59]">0 / 8 COMPLETED (0%)</span>
+          </div>
+        </div>
+        <div class="w-full h-3 bg-[#0c1f3a] rounded-full overflow-hidden border border-white/10 p-0.5 shadow-inner">
+          <div id="roadmapProgressBar" class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-[#21d4e5] via-[#34d399] to-[#ffdf59]" style="width: 4%;"></div>
+        </div>
+      </div>
+
+      <!-- 4 Columns x 2 Rows Interactive Stage Grid -->
+      <div id="stagesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- ACTIVE STAGE INTERACTIVE WORKSPACE -->
+    <section id="stageWorkspaceSection" class="mata-panel rounded-2xl p-5 sm:p-8 border border-[#21d4e5]/30 relative overflow-hidden">
+      <div id="stageWorkspaceContent"></div>
+    </section>
+
+    <!-- DEVELOPER PROFILE SECTION (LOCKED & PERMANENT) -->
+    <section id="developerProfileSection" class="space-y-4 pt-2">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#21d4e5] to-[#0284c7] flex items-center justify-center text-2xl shadow-lg shadow-[#21d4e5]/25 shrink-0">
+          👩‍💻
+        </div>
+        <div>
+          <h2 class="font-hud text-xl sm:text-2xl font-extrabold text-white tracking-wide uppercase" data-i18n="devSectionTitle">
+            DEVELOPER PROFILE
+          </h2>
+          <p class="text-xs sm:text-sm text-[#8fb2d4]" data-i18n="devSectionSubtitle">
+            Learn more about the creator of this M.A.T.A Academy learning mission.
+          </p>
+        </div>
+      </div>
+
+      <div class="mata-panel rounded-2xl p-6 sm:p-8 border border-[#21d4e5]/25 bg-[#0a1b31]/90 select-none">
+        <div class="flex flex-col sm:flex-row items-center sm:items-center gap-6 sm:gap-8 text-center sm:text-left">
+          <!-- Permanent Locked Developer Photo -->
+          <div class="shrink-0">
+            <div class="w-32 h-36 sm:w-36 sm:h-40 rounded-2xl p-1 border-2 border-dashed border-[#21d4e5] bg-[#07162b] shadow-lg shadow-[#21d4e5]/15 overflow-hidden relative group">
+              <img
+                id="devAvatarImg"
+                src="Screenshot 2026-11-12 213325_2.jpg"
+                onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1';this.src='Screenshot 2026-11-12 213325.jpg';return;}this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 240 270%22><defs><linearGradient id=%22bg%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22><stop offset=%220%25%22 stop-color=%22%231e40af%22/><stop offset=%22100%25%22 stop-color=%22%232563eb%22/></linearGradient></defs><rect width=%22240%22 height=%22270%22 fill=%22url(%23bg)%22/><path d=%22M35 270 C35 190, 205 190, 205 270 Z%22 fill=%22%230f172a%22/><path d=%22M60 112 C60 46, 180 46, 180 112 L192 255 L48 255 Z%22 fill=%22%23111827%22/><ellipse cx=%22120%22 cy=%22116%22 rx=%2242%22 ry=%2248%22 fill=%22%23fde68a%22/><path d=%22M78 106 Q120 78 162 106 Q160 66 120 66 Q80 66 78 106 Z%22 fill=%22%23111827%22/><path d=%22M96 105 Q106 101 114 105%22 stroke=%22%23374151%22 stroke-width=%222.5%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M126 105 Q134 101 144 105%22 stroke=%22%23374151%22 stroke-width=%222.5%22 fill=%22none%22 stroke-linecap=%22round%22/><ellipse cx=%22105%22 cy=%22114%22 rx=%225.5%22 ry=%224%22 fill=%22%231f2937%22/><ellipse cx=%22135%22 cy=%22114%22 rx=%225.5%22 ry=%224%22 fill=%22%231f2937%22/><circle cx=%22106.5%22 cy=%22113%22 r=%221.3%22 fill=%22%23ffffff%22/><circle cx=%22136.5%22 cy=%22113%22 r=%221.3%22 fill=%22%23ffffff%22/><path d=%22M120 116 L118 127 L123 128%22 stroke=%22%23d97706%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M106 138 Q120 149 134 138%22 stroke=%22%23e11d48%22 stroke-width=%223.5%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M74 148 Q120 198 166 148 L178 265 L62 265 Z%22 fill=%22%23111827%22/></svg>';"
+                alt="Sharifah Nur Zahira Binti Syed Yahya Putra"
+                draggable="false"
+                class="w-full h-full rounded-xl object-cover object-top pointer-events-none"
+              />
+              <label id="devPhotoLockOverlay" class="absolute inset-1 rounded-xl bg-[#07162b]/80 backdrop-blur-xs flex flex-col items-center justify-center text-center p-2 cursor-pointer transition hover:bg-[#07162b]/90">
+                <span class="text-lg">📸</span>
+                <span class="font-hud text-[10px] font-extrabold uppercase text-[#21d4e5] leading-tight mt-1">Click to Insert & Lock Real Photo</span>
+                <input type="file" accept="image/*" class="hidden" onchange="lockDeveloperPhotoOnce(event)" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Permanent Developer Details -->
+          <div class="space-y-2">
+            <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#21d4e5]" data-i18n="devRoleBadge">
+              WEBSITE DEVELOPER
+            </div>
+            <h3 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              Sharifah Nur Zahira Binti Syed Yahya Putra
+            </h3>
+            <p class="text-sm sm:text-base font-medium text-slate-200 pt-1">
+              Student Of Mathematical Education / Siswi Pendidikan Matematik
+            </p>
+            <p class="text-sm sm:text-base text-[#8fb2d4]">
+              Institut Pendidikan Guru Kampus Tun Abdul Razak
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-white/10 bg-[#051020] py-4 px-4 text-center text-xs text-[#8fb2d4]">
+    <span>M.A.T.A ACADEMY CYBERAYA • 8-STAGE SIMULATION OPERATIONS 03.1</span>
+  </footer>
+
+  <!-- FLOATING COMOT SVG MASCOT + POP-UP IRIS AI CHAT WIDGET -->
+  <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;" class="flex flex-col items-end">
+
+    <!-- POP-UP IRIS AI CHAT BOX -->
+    <div id="comotIrisPopup" class="hidden mb-3 w-[340px] sm:w-[360px] max-w-[calc(100vw-32px)] bg-[#0a1b31]/95 backdrop-blur-xl border-2 border-[#21d4e5] rounded-2xl shadow-2xl shadow-[#21d4e5]/25 overflow-hidden transition-all duration-200">
+      <div class="bg-gradient-to-r from-[#102641] via-[#153459] to-[#102641] px-4 py-3 border-b border-[#21d4e5]/40 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-full bg-[#21d4e5]/20 border-2 border-[#21d4e5] flex items-center justify-center iris-pulse shrink-0">
+            <span class="font-hud font-black text-[11px] text-[#21d4e5]">IRIS</span>
+          </div>
+          <div>
+            <div class="font-hud text-xs font-extrabold text-white flex items-center gap-1.5">
+              <span>I.R.I.S. AI × COMOT</span>
+              <span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+            </div>
+            <div class="text-[10px] text-[#8fb2d4]" data-i18n="irisPopupSub">Agent Financial Tactical Assistant</div>
+          </div>
+        </div>
+        <button type="button" onclick="toggleComotChat(false)" aria-label="Close IRIS Chat" class="w-7 h-7 rounded-lg bg-[#07162b] hover:bg-[#ff526b]/20 text-[#8fb2d4] hover:text-[#ff526b] border border-white/10 flex items-center justify-center text-xs font-bold transition">
+          ✕
+        </button>
+      </div>
+
+      <div id="irisChatLog" class="h-60 overflow-y-auto p-3.5 space-y-2.5 bg-[#07162b]/90">
+        <div class="bg-[#102641] border border-[#21d4e5]/30 rounded-xl p-2.5 text-xs text-slate-100 leading-relaxed">
+          <span class="font-hud text-[10px] font-bold text-[#21d4e5] block mb-0.5">I.R.I.S. AI • COMOT LINK</span>
+          <span data-i18n="irisWelcome">Meow! Greetings Agent! I am I.R.I.S. with Comot. Type your question below about any of the 8 mission stages, Ringgit & Sen, or regrouping 100 sen as RM1!</span>
+        </div>
+      </div>
+
+      <div class="px-3 py-2 bg-[#0a1b31] border-t border-white/10 flex flex-wrap gap-1.5">
+        <button type="button" onclick="askIrisPreset('stage_hint')" class="text-[10px] px-2 py-1 rounded-lg bg-[#102641] hover:bg-[#1a3a63] text-[#34d399] border border-[#34d399]/30 transition" data-i18n="chipStageHint">
+          Hint for current stage
+        </button>
+        <button type="button" onclick="askIrisPreset('regroup_100')" class="text-[10px] px-2 py-1 rounded-lg bg-[#102641] hover:bg-[#1a3a63] text-[#ffdf59] border border-[#ffdf59]/30 transition" data-i18n="chipRegroup">
+          How to regroup 100 sen?
+        </button>
+        <button type="button" onclick="askIrisPreset('place_value')" class="text-[10px] px-2 py-1 rounded-lg bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/30 transition" data-i18n="chipPlaceValue">
+          Explain Place Value
+        </button>
+      </div>
+
+      <form onsubmit="handleIrisChatSubmit(event)" class="p-2.5 bg-[#102641] border-t border-[#21d4e5]/30 flex items-center gap-2">
+        <input id="irisUserInput" type="text" placeholder="Ask I.R.I.S. & Comot anything..." class="flex-1 bg-[#07162b] border border-[#21d4e5]/40 focus:border-[#21d4e5] rounded-xl px-3 py-2 text-xs text-white outline-none" />
+        <button type="submit" class="btn-cyan px-3.5 py-2 rounded-xl font-hud text-[11px] uppercase shrink-0" data-i18n="btnSend">
+          Send
+        </button>
+      </form>
+    </div>
+
+    <!-- Floating Comot Speech Badge -->
+    <div id="comotMiniTag" onclick="toggleComotChat(true)" class="cursor-pointer mb-1.5 px-3 py-1.5 rounded-full bg-[#102641]/95 border border-[#ffdf59] text-[11px] font-bold text-white shadow-lg hover:scale-105 transition flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-[#34d399] animate-ping"></span>
+      <span data-i18n="comotCallout">Ask I.R.I.S. / Comot!</span>
+    </div>
+
+    <!-- Interactive Comot SVG Button -->
+    <button type="button" onclick="toggleComotChat()" aria-label="Open I.R.I.S. AI Chat with Comot" class="comot-float w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-b from-[#16365c] to-[#07162b] border-2 border-[#21d4e5] shadow-2xl shadow-[#21d4e5]/40 flex items-center justify-center hover:scale-105 transition focus:outline-none relative">
+      <span class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-[#ffdf59] text-[#07162b] font-hud text-[9px] font-black flex items-center justify-center border border-[#07162b]">AI</span>
+      <svg viewBox="0 0 100 100" class="w-14 h-14 sm:w-16 sm:h-16">
+        <polygon points="20,42 15,12 42,28" fill="#111827" stroke="#21d4e5" stroke-width="2.5"/>
+        <polygon points="80,42 85,12 58,28" fill="#111827" stroke="#21d4e5" stroke-width="2.5"/>
+        <polygon points="23,37 20,19 36,29" fill="#f472b6"/>
+        <polygon points="77,37 80,19 64,29" fill="#f472b6"/>
+        <ellipse cx="50" cy="56" rx="34" ry="30" fill="#111827" stroke="#21d4e5" stroke-width="2.5"/>
+        <ellipse cx="50" cy="64" rx="18" ry="13" fill="#f8fafc"/>
+        <circle cx="36" cy="50" r="7.5" fill="#21d4e5"/>
+        <circle cx="36" cy="50" r="3.5" fill="#07162b"/>
+        <circle cx="34" cy="48" r="1.5" fill="#ffffff"/>
+        <circle cx="64" cy="50" r="7.5" fill="#ffdf59"/>
+        <circle cx="64" cy="50" r="3.5" fill="#07162b"/>
+        <circle cx="62" cy="48" r="1.5" fill="#ffffff"/>
+        <polygon points="47,59 53,59 50,63" fill="#fb7185"/>
+        <path d="M43 66 Q50 72 57 66" stroke="#0f172a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <path d="M28 81 Q50 88 72 81" stroke="#21d4e5" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="50" cy="84" r="4" fill="#ffdf59"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    // ==========================================
+    // 1. GLOBAL STATE & 8-STAGE CONFIGURATION
+    // ==========================================
+    let currentLang = 'en';
+    let activeStage = 1;
+    let completedStages = [false, false, false, false, false, false, false, false];
+    let agentName = "EJEN ALI";
+    let totalXP = 0;
+    let isComotChatOpen = false;
+
+    // --- MISSION 2 (5 Questions, Pass >= 3/5, Retake with new questions) ---
+    let m2RoundQuestions = [];
+    let m2UsedIndices = [];
+    let m2Index = 0;
+    let m2Score = 0;
+    let m2AnsweredCurrent = false;
+    let m2SelectedOption = null;
+    let m2RoundFinished = false;
+    let m2NeedsRetake = false;
+
+    // --- MISSION 3 (5 Questions, Pass >= 3/5, Retake with new questions) ---
+    let m3RoundQuestions = [];
+    let m3UsedIndices = [];
+    let m3Index = 0;
+    let m3Score = 0;
+    let m3AnsweredCurrent = false;
+    let m3SelectedOption = null;
+    let m3RoundFinished = false;
+    let m3NeedsRetake = false;
+
+    // --- MISSION 4 (Gadget Lab: 60s timer + strict stop & retake rule) ---
+    let gadgetLabItems = [];
+    let gadgetTimer = 60;
+    // --- MISSION 5 (IRIS Protocol Regrouping Simulator: 3 Missions, Pass >= 2/3) ---
+    let irisSenA = '';
+    let irisSenB = '';
+    let irisSimResult = null;
+    let irisLessonOpen = false;
+    let m5RoundMissions = [];
+    let m5UsedIndices = [];
+    let m5Index = 0;
+    let m5Score = 0;
+    let m5AnsweredCurrent = false;
+    let m5SelectedOption = null;
+    let m5RoundFinished = false;
+    let m5NeedsRetake = false;
+    let m5SimVerifiedCurrent = false;
+
+    // --- MISSION 6 (Mini Market: Misi Bajet RM20.00 + Pengimbas Baki Wang) ---
+    let marketSelectedIds = [1, 2];
+    let marketCalcPaid = "10.00";
+    let marketCalcPrice = "4.50";
+    let marketCalcBalanceText = "RM 5.50";
+    let marketCalcIsShort = false;
+    let marketFeedbackMsg = null;
+    let marketFeedbackType = "info";
+
+    // --- MISSION 7 (Agent Test: 8 Questions, Pass >= 6/8, Retake with new questions) ---
+    let m7RoundQuestions = [];
+    let m7UsedIndices = [];
+    let m7Index = 0;
+    let m7Score = 0;
+    let m7AnsweredCurrent = false;
+    let m7SelectedOption = null;
+    let m7RoundFinished = false;
+    let m7NeedsRetake = false;
+
+    // ==========================================
+    // 2. QUESTION BANKS (M2 REAL MYR CURRENCY & M3 & M7)
+    // ==========================================
+    function renderMalaysianCurrencyGraphic(spec) {
+      if (spec.type === 'note') {
+        const themes = {
+          RM100: { bg1: '#581c87', bg2: '#3b0764', accent: '#e9d5ff', motif: 'GUNUNG KINABALU', icon: '🏔️', serial: 'MY1008842' },
+          RM50:  { bg1: '#0f766e', bg2: '#115e59', accent: '#99f6e4', motif: 'KELAPA SAWIT & BNM', icon: '🌴', serial: 'MY5091204' },
+          RM20:  { bg1: '#c2410c', bg2: '#7c2d12', accent: '#fed7aa', motif: 'PENYU KARAH & BELIMBING', icon: '🐢', serial: 'MY2045619' },
+          RM10:  { bg1: '#b91c1c', bg2: '#7f1d1d', accent: '#fecaca', motif: 'BUNGA RAFFLESIA', icon: '🌺', serial: 'MY1077312' },
+          RM5:   { bg1: '#15803d', bg2: '#14532d', accent: '#bbf7d0', motif: 'BURUNG KENYALANG', icon: '🦅', serial: 'MY0533810' },
+          RM1:   { bg1: '#1d4ed8', bg2: '#1e3a8a', accent: '#bfdbfe', motif: 'WAU BULAN MALAYSIA', icon: '🪁', serial: 'MY0162945' }
+        };
+        const t = themes[spec.code] || themes.RM1;
+        return `
+          <div class="w-72 sm:w-80 h-36 rounded-2xl border-2 border-white/40 shadow-2xl relative overflow-hidden p-3.5 flex flex-col justify-between select-none"
+               style="background: linear-gradient(135deg, ${t.bg1} 0%, ${t.bg2} 100%);">
+            <div class="absolute right-8 top-0 bottom-0 w-3 bg-gradient-to-b from-white/30 via-amber-200/40 to-white/25 border-x border-white/20"></div>
+            <div class="absolute -right-4 -bottom-4 text-6xl opacity-20">${t.icon}</div>
+            <div class="flex items-start justify-between relative z-10">
+              <div>
+                <div class="font-hud text-[10px] font-extrabold tracking-widest uppercase text-white/90">BANK NEGARA MALAYSIA</div>
+                <div class="text-[9px] font-mono tracking-wider" style="color:${t.accent}">${t.serial}</div>
+              </div>
+              <div class="font-hud text-2xl sm:text-3xl font-black text-white drop-shadow">${spec.code}</div>
+            </div>
+            <div class="flex items-center gap-2.5 relative z-10 my-auto">
+              <div class="w-11 h-11 rounded-full bg-white/15 border border-white/35 flex items-center justify-center text-2xl shadow-inner">
+                ${t.icon}
+              </div>
+              <div>
+                <div class="text-[10px] font-hud font-bold uppercase tracking-wider" style="color:${t.accent}">${t.motif}</div>
+                <div class="text-[10px] text-white/80">Ringgit Malaysia • Sah Diperlakukan</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] font-hud font-bold text-white/85 relative z-10 border-t border-white/15 pt-1">
+              <span>🌺 BUNGA RAYA</span>
+              <span>${spec.code}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      if (spec.type === 'coin') {
+        const coinThemes = {
+          '50 sen': { ring: 'from-yellow-300 via-amber-500 to-yellow-700', inner: 'from-amber-400 to-yellow-600', text: 'text-amber-950', motif: 'SULUR KACANG', size: 'w-32 h-32' },
+          '20 sen': { ring: 'from-yellow-200 via-amber-400 to-yellow-600', inner: 'from-amber-300 to-amber-500', text: 'text-amber-950', motif: 'BUNGA MELUR', size: 'w-28 h-28' },
+          '10 sen': { ring: 'from-slate-200 via-slate-400 to-slate-600', inner: 'from-slate-300 to-slate-500', text: 'text-slate-900', motif: 'ANYAMAN MAH MERI', size: 'w-26 h-26' },
+          '5 sen':  { ring: 'from-gray-100 via-slate-300 to-slate-500', inner: 'from-slate-200 to-slate-400', text: 'text-slate-900', motif: 'DESTAR SIGA', size: 'w-24 h-24' }
+        };
+        const c = coinThemes[spec.code] || coinThemes['50 sen'];
+        return `
+          <div class="flex flex-col items-center justify-center py-2">
+            <div class="${c.size} rounded-full bg-gradient-to-br ${c.ring} p-2 shadow-2xl border-2 border-white/60 flex items-center justify-center">
+              <div class="w-full h-full rounded-full bg-gradient-to-tr ${c.inner} border border-dashed border-black/30 flex flex-col items-center justify-center text-center px-1">
+                <span class="text-[8px] font-hud font-extrabold uppercase tracking-tighter ${c.text} opacity-80">BANK NEGARA</span>
+                <span class="font-hud text-xl sm:text-2xl font-black ${c.text} leading-none my-0.5">${spec.code}</span>
+                <span class="text-[7px] font-bold uppercase ${c.text} opacity-75">🌺 ${c.motif}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Combo note + coin visual
+      return `
+        <div class="flex flex-wrap items-center justify-center gap-3 py-2">
+          ${spec.items.map(it => it.startsWith('RM')
+            ? `<div class="px-4 py-3 rounded-xl font-hud text-lg font-black text-white border border-white/40 shadow-lg ${
+                it === 'RM20' ? 'bg-gradient-to-br from-orange-600 to-amber-800' :
+                it === 'RM10' ? 'bg-gradient-to-br from-red-600 to-rose-900' :
+                it === 'RM5'  ? 'bg-gradient-to-br from-green-600 to-emerald-900' :
+                                'bg-gradient-to-br from-blue-600 to-indigo-900'
+              }">
+                <div class="text-[8px] font-normal opacity-80">BNM</div>
+                ${it}
+              </div>`
+            : `<div class="w-16 h-16 rounded-full font-hud text-xs font-black flex flex-col items-center justify-center border-2 border-white/60 shadow-lg ${
+                it === '50 sen' || it === '20 sen'
+                  ? 'bg-gradient-to-br from-yellow-300 to-amber-600 text-amber-950'
+                  : 'bg-gradient-to-br from-slate-200 to-slate-500 text-slate-900'
+              }">
+                <span>${it}</span>
+              </div>`
+          ).join('<span class="font-hud text-xl font-black text-[#ffdf59]">+</span>')}
+        </div>
+      `;
+    }
+
+    const m2QuestionBank = [
+      {
+        specimen: { type: 'note', code: 'RM100' },
+        prompt: { en: "Identify this real Malaysian banknote featuring Mount Kinabalu:", bm: "Kenal pasti wang kertas sebenar Malaysia yang memaparkan Gunung Kinabalu ini:" },
+        options: ["RM100", "RM50", "RM20", "RM10"],
+        correct: 0
+      },
+      {
+        specimen: { type: 'note', code: 'RM50' },
+        prompt: { en: "Identify this blue-green Malaysian banknote with oil palm & BNM motif:", bm: "Kenal pasti wang kertas biru-hijau Malaysia dengan motif kelapa sawit & BNM:" },
+        options: ["RM20", "RM50", "RM100", "RM5"],
+        correct: 1
+      },
+      {
+        specimen: { type: 'note', code: 'RM20' },
+        prompt: { en: "Identify this orange Malaysian banknote featuring Hawksbill & Leatherback turtles:", bm: "Kenal pasti wang kertas jingga Malaysia yang memaparkan penyu karah & belimbing:" },
+        options: ["RM10", "RM5", "RM20", "RM50"],
+        correct: 2
+      },
+      {
+        specimen: { type: 'note', code: 'RM10' },
+        prompt: { en: "Identify this red Malaysian banknote featuring the Rafflesia flower:", bm: "Kenal pasti wang kertas merah Malaysia yang memaparkan bunga Rafflesia:" },
+        options: ["RM1", "RM5", "RM10", "RM20"],
+        correct: 2
+      },
+      {
+        specimen: { type: 'note', code: 'RM5' },
+        prompt: { en: "Identify this green polymer banknote featuring the Rhinoceros Hornbill:", bm: "Kenal pasti wang kertas polimer hijau yang memaparkan Burung Kenyalang:" },
+        options: ["RM1", "RM5", "RM10", "RM50"],
+        correct: 1
+      },
+      {
+        specimen: { type: 'note', code: 'RM1' },
+        prompt: { en: "Identify this blue polymer banknote featuring Wau Bulan:", bm: "Kenal pasti wang kertas polimer biru yang memaparkan Wau Bulan:" },
+        options: ["RM1", "RM5", "50 sen", "RM10"],
+        correct: 0
+      },
+      {
+        specimen: { type: 'coin', code: '50 sen' },
+        prompt: { en: "Identify this gold-colored Malaysian coin with Sulur Kacang motif:", bm: "Kenal pasti syiling berwarna emas Malaysia dengan motif Sulur Kacang ini:" },
+        options: ["10 sen", "20 sen", "50 sen", "5 sen"],
+        correct: 2
+      },
+      {
+        specimen: { type: 'coin', code: '20 sen' },
+        prompt: { en: "Identify this gold-colored Malaysian coin featuring Bunga Melur:", bm: "Kenal pasti syiling berwarna emas Malaysia yang memaparkan Bunga Melur ini:" },
+        options: ["50 sen", "20 sen", "10 sen", "5 sen"],
+        correct: 1
+      },
+      {
+        specimen: { type: 'coin', code: '10 sen' },
+        prompt: { en: "Identify this silver-colored Malaysian coin with Mah Meri weaving motif:", bm: "Kenal pasti syiling berwarna perak Malaysia dengan motif anyaman Mah Meri:" },
+        options: ["5 sen", "10 sen", "20 sen", "50 sen"],
+        correct: 1
+      },
+      {
+        specimen: { type: 'coin', code: '5 sen' },
+        prompt: { en: "Identify this smallest silver Malaysian coin featuring Destar Siga:", bm: "Kenal pasti syiling perak paling kecil Malaysia yang memaparkan Destar Siga:" },
+        options: ["5 sen", "10 sen", "20 sen", "50 sen"],
+        correct: 0
+      },
+      {
+        specimen: { type: 'combo', items: ['RM20', 'RM5', '50 sen'] },
+        prompt: { en: "Calculate the total value of the real Malaysian notes & coin shown:", bm: "Hitung jumlah nilai wang kertas & syiling Malaysia yang dipaparkan:" },
+        options: ["RM25.05", "RM25.50", "RM30.50", "RM20.55"],
+        correct: 1
+      },
+      {
+        specimen: { type: 'combo', items: ['RM10', 'RM1', '20 sen', '5 sen'] },
+        prompt: { en: "Calculate the exact value of these real Malaysian currency items:", bm: "Hitung nilai tepat bagi gabungan wang kertas & syiling Malaysia ini:" },
+        options: ["RM11.25", "RM11.75", "RM12.25", "RM10.25"],
+        correct: 0
+      }
+    ];
+
+    const m3QuestionBank = [
+      {
+        equation: "RM 12.50 + RM 8.90",
+        prompt: { en: "What is the combined total of these two amounts?", bm: "Berapakah jumlah gabungan kedua-dua nilai wang ini?" },
+        options: ["RM 20.40", "RM 21.40", "RM 22.40", "RM 21.90"],
+        correct: 1
+      },
+      {
+        equation: "RM 25.30 + RM 14.70",
+        prompt: { en: "Add the two amounts (regroup 100 sen = RM1.00):", bm: "Tambah kedua-dua jumlah ini (kumpul semula 100 sen = RM1.00):" },
+        options: ["RM 39.00", "RM 40.00", "RM 41.00", "RM 39.10"],
+        correct: 1
+      },
+      {
+        equation: "RM 45.65 + RM 32.80",
+        prompt: { en: "Calculate the exact total sum:", bm: "Hitung jumlah keseluruhan yang tepat:" },
+        options: ["RM 77.45", "RM 78.45", "RM 78.35", "RM 79.45"],
+        correct: 1
+      },
+      {
+        equation: "RM 18.40 + RM 11.25",
+        prompt: { en: "Find the sum of both Ringgit and Sen values:", bm: "Cari hasil tambah bagi nilai Ringgit dan Sen ini:" },
+        options: ["RM 29.65", "RM 28.65", "RM 29.75", "RM 30.65"],
+        correct: 0
+      },
+      {
+        equation: "RM 64.90 + RM 25.50",
+        prompt: { en: "What is the total amount after regrouping sen?", bm: "Berapakah jumlah wang selepas mengumpul semula sen?" },
+        options: ["RM 89.40", "RM 90.40", "RM 91.40", "RM 90.00"],
+        correct: 1
+      },
+      {
+        equation: "RM 33.75 + RM 16.25",
+        prompt: { en: "Combine both amounts accurately:", bm: "Gabungkan kedua-dua jumlah dengan tepat:" },
+        options: ["RM 49.00", "RM 50.00", "RM 50.50", "RM 49.90"],
+        correct: 1
+      },
+      {
+        equation: "RM 52.15 + RM 27.60",
+        prompt: { en: "What is the total of RM 52.15 and RM 27.60?", bm: "Berapakah jumlah bagi RM 52.15 dan RM 27.60?" },
+        options: ["RM 79.75", "RM 78.75", "RM 80.75", "RM 79.85"],
+        correct: 0
+      },
+      {
+        equation: "RM 19.85 + RM 24.45",
+        prompt: { en: "Add both amounts carefully:", bm: "Tambah kedua-dua jumlah ini dengan teliti:" },
+        options: ["RM 43.30", "RM 44.30", "RM 44.20", "RM 45.30"],
+        correct: 1
+      },
+      {
+        equation: "RM 70.50 + RM 19.80",
+        prompt: { en: "Calculate the total Ringgit and Sen:", bm: "Kira jumlah Ringgit dan Sen:" },
+        options: ["RM 89.30", "RM 90.30", "RM 91.30", "RM 90.80"],
+        correct: 1
+      },
+      {
+        equation: "RM 36.45 + RM 42.35",
+        prompt: { en: "Find the exact combined sum:", bm: "Cari jumlah gabungan yang tepat:" },
+        options: ["RM 78.70", "RM 78.80", "RM 79.80", "RM 77.80"],
+        correct: 1
+      }
+    ];
+
+    const m7QuestionBank = [
+      {
+        q: { en: "What is the value of 100 sen when regrouped into Ringgit Malaysia?", bm: "Berapakah nilai 100 sen apabila dikumpul semula kepada Ringgit Malaysia?" },
+        opts: ["RM 0.10", "RM 1.00", "RM 10.00", "RM 100.00"],
+        ans: 1
+      },
+      {
+        q: { en: "Combine RM 45.60 + RM 32.50. What is the exact total?", bm: "Gabungkan RM 45.60 + RM 32.50. Berapakah jumlah tepat?" },
+        opts: ["RM 77.10", "RM 78.10", "RM 78.50", "RM 79.10"],
+        ans: 1
+      },
+      {
+        q: { en: "Which digit is in the HUNDREDS place of RM 482.95?", bm: "Digit manakah berada pada nilai tempat RATUS bagi RM 482.95?" },
+        opts: ["4", "8", "2", "9"],
+        ans: 0
+      },
+      {
+        q: { en: "Ejen Ali pays RM 100.00 for a gadget costing RM 68.40. What is his balance?", bm: "Ejen Ali membayar RM 100.00 untuk gajet berharga RM 68.40. Berapakah bakinya?" },
+        opts: ["RM 32.60", "RM 31.40", "RM 31.60", "RM 41.60"],
+        ans: 2
+      },
+      {
+        q: { en: "Which Malaysian banknote features Mount Kinabalu and is purple in color?", bm: "Wang kertas Malaysia manakah memaparkan Gunung Kinabalu dan berwarna ungu?" },
+        opts: ["RM 20", "RM 50", "RM 100", "RM 10"],
+        ans: 2
+      },
+      {
+        q: { en: "Add 85 sen + 65 sen and regroup into Ringgit and Sen:", bm: "Tambah 85 sen + 65 sen dan kumpul semula kepada Ringgit dan Sen:" },
+        opts: ["RM 1.40", "RM 1.50", "RM 1.60", "RM 15.00"],
+        ans: 1
+      },
+      {
+        q: { en: "Ejen Alicia buys 3 IRIS batteries at RM 12.20 each. Total cost?", bm: "Ejen Alicia membeli 3 bateri IRIS berharga RM 12.20 setiap satu. Jumlah kos?" },
+        opts: ["RM 36.40", "RM 36.60", "RM 35.60", "RM 37.60"],
+        ans: 1
+      },
+      {
+        q: { en: "Which Malaysian banknote is green and features the Rhinoceros Hornbill?", bm: "Wang kertas Malaysia manakah berwarna hijau dan memaparkan Burung Kenyalang?" },
+        opts: ["RM 1", "RM 5", "RM 10", "RM 50"],
+        ans: 1
+      },
+      {
+        q: { en: "How many 20 sen coins are needed to make RM 2.00 (200 sen)?", bm: "Berapa keping syiling 20 sen diperlukan untuk menjadikan RM 2.00 (200 sen)?" },
+        opts: ["5 coins", "8 coins", "10 coins", "20 coins"],
+        ans: 2
+      },
+      {
+        q: { en: "Mission budget is RM 250.00. Ejen Bakar spends RM 174.75. Remaining funds?", bm: "Bajet misi ialah RM 250.00. Ejen Bakar membelanjakan RM 174.75. Baki dana?" },
+        opts: ["RM 75.25", "RM 76.25", "RM 85.25", "RM 75.75"],
+        ans: 0
+      },
+      {
+        q: { en: "What is the place value of digit 7 in RM 179.35?", bm: "Apakah nilai tempat bagi digit 7 dalam RM 179.35?" },
+        opts: ["Hundreds / Ratus", "Tens / Puluh", "Ones / Sa", "Sen"],
+        ans: 1
+      },
+      {
+        q: { en: "Two RM50 notes + three RM10 notes + four 50 sen coins equals:", bm: "Dua keping RM50 + tiga keping RM10 + empat syiling 50 sen bersamaan:" },
+        opts: ["RM 130.50", "RM 132.00", "RM 134.00", "RM 122.00"],
+        ans: 1
+      }
+    ];
+
+    const m5MissionBank = [
+      {
+        a: 75,
+        b: 45,
+        prompt: {
+          en: "Sub-Mission 1: Add 75 sen and 45 sen in the IRIS simulator, then select the regrouped RM value:",
+          bm: "Sub-Misi 1: Tambah 75 sen dan 45 sen dalam simulator IRIS, kemudian pilih nilai RM yang dikumpul semula:"
+        },
+        options: ["RM1.10", "RM1.20", "RM1.30", "RM12.00"],
+        correct: 1
+      },
+      {
+        a: 85,
+        b: 65,
+        prompt: {
+          en: "Sub-Mission 2: Add 85 sen and 65 sen in the IRIS simulator, then select the regrouped RM value:",
+          bm: "Sub-Misi 2: Tambah 85 sen dan 65 sen dalam simulator IRIS, kemudian pilih nilai RM yang dikumpul semula:"
+        },
+        options: ["RM1.40", "RM1.50", "RM1.60", "RM15.00"],
+        correct: 1
+      },
+      {
+        a: 90,
+        b: 35,
+        prompt: {
+          en: "Sub-Mission 3: Add 90 sen and 35 sen in the IRIS simulator, then select the regrouped RM value:",
+          bm: "Sub-Misi 3: Tambah 90 sen dan 35 sen dalam simulator IRIS, kemudian pilih nilai RM yang dikumpul semula:"
+        },
+        options: ["RM1.25", "RM1.15", "RM1.35", "RM12.50"],
+        correct: 0
+      },
+      {
+        a: 60,
+        b: 70,
+        prompt: {
+          en: "Add 60 sen and 70 sen in the IRIS simulator, then select the regrouped RM value:",
+          bm: "Tambah 60 sen dan 70 sen dalam simulator IRIS, kemudian pilih nilai RM yang dikumpul semula:"
+        },
+        options: ["RM1.20", "RM1.30", "RM1.40", "RM13.00"],
+        correct: 1
+      },
+      {
+        a: 95,
+        b: 85,
+        prompt: {
+          en: "Add 95 sen and 85 sen in the IRIS simulator, then select the regrouped RM value:",
+          bm: "Tambah 95 sen dan 85 sen dalam simulator IRIS, kemudian pilih nilai RM yang dikumpul semula:"
+        },
+        options: ["RM1.70", "RM1.80", "RM1.90", "RM18.00"],
+        correct: 1
+      },
+      {
+        a: 55,
+        b: 80,
+        prompt: {
+          en: "Add 55 sen and 80 sen in the IRIS simulator, then select the regrouped RM value:",
+          bm: "Tambah 55 sen dan 80 sen dalam simulator IRIS, kemudian pilih nilai RM yang dikumpul semula:"
+        },
+        options: ["RM1.25", "RM1.35", "RM1.45", "RM13.50"],
+        correct: 1
+      }
+    ];
+
+    function pickFreshQuestions(bank, usedTracker, count) {
+      let available = bank.map((_, idx) => idx).filter(idx => !usedTracker.includes(idx));
+      if (available.length < count) {
+        usedTracker.length = 0;
+        available = bank.map((_, idx) => idx);
+      }
+      for (let i = available.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [available[i], available[j]] = [available[j], available[i]];
+      }
+      const chosenIndices = available.slice(0, count);
+      chosenIndices.forEach(idx => usedTracker.push(idx));
+      return chosenIndices.map(idx => bank[idx]);
+    }
+
+    function initMission2Round(isRetake = false) {
+      m2RoundQuestions = pickFreshQuestions(m2QuestionBank, m2UsedIndices, 5);
+      m2Index = 0;
+      m2Score = 0;
+      m2AnsweredCurrent = false;
+      m2SelectedOption = null;
+      m2RoundFinished = false;
+      if (isRetake) {
+        completedStages[1] = false;
+        m2NeedsRetake = false;
+        renderStagesGrid();
+        updateTopProgress();
+      }
+    }
+
+    function initMission3Round(isRetake = false) {
+      m3RoundQuestions = pickFreshQuestions(m3QuestionBank, m3UsedIndices, 5);
+      m3Index = 0;
+      m3Score = 0;
+      m3AnsweredCurrent = false;
+      m3SelectedOption = null;
+      m3RoundFinished = false;
+      if (isRetake) {
+        completedStages[2] = false;
+        m3NeedsRetake = false;
+        renderStagesGrid();
+        updateTopProgress();
+      }
+    }
+
+    function initMission7Round(isRetake = false) {
+      m7RoundQuestions = pickFreshQuestions(m7QuestionBank, m7UsedIndices, 8);
+      m7Index = 0;
+      m7Score = 0;
+      m7AnsweredCurrent = false;
+      m7SelectedOption = null;
+      m7RoundFinished = false;
+      if (isRetake) {
+        completedStages[6] = false;
+        m7NeedsRetake = false;
+        renderStagesGrid();
+        updateTopProgress();
+      }
+    }
+
+    function initMission5Round(isRetake = false) {
+      m5RoundMissions = pickFreshQuestions(m5MissionBank, m5UsedIndices, 3);
+      m5Index = 0;
+      m5Score = 0;
+      m5AnsweredCurrent = false;
+      m5SelectedOption = null;
+      m5RoundFinished = false;
+      m5SimVerifiedCurrent = false;
+      irisSimResult = null;
+      irisSenA = '';
+      irisSenB = '';
+      if (isRetake) {
+        completedStages[4] = false;
+        m5NeedsRetake = false;
+        renderStagesGrid();
+        updateTopProgress();
+      }
+    }
+
+    // ==========================================
+    // 3. 8-STAGE DEFINITIONS & RANK LOGIC
+    // ==========================================
+    const stagesMeta = [
+      { id: 1, icon: "📡", title: { en: "1. Briefing", bm: "1. Taklimat" }, sub: { en: "Mission objectives & rules.", bm: "Objektif & peraturan misi." } },
+      { id: 2, icon: "💵", title: { en: "2. Money ID", bm: "2. Kenal Wang" }, sub: { en: "Pass ≥ 3/5 questions.", bm: "Lulus ≥ 3/5 soalan." } },
+      { id: 3, icon: "➕", title: { en: "3. Add Values", bm: "3. Tambah Nilai" }, sub: { en: "Pass ≥ 3/5 questions.", bm: "Lulus ≥ 3/5 soalan." } },
+      { id: 4, icon: "🧪", title: { en: "4. Gadget Lab", bm: "4. Makmal Gajet" }, sub: { en: "Use the money scanner.", bm: "Guna pengimbas wang." } },
+      { id: 5, icon: "💡", title: { en: "5. IRIS Protocol", bm: "5. Protokol IRIS" }, sub: { en: "Regroup 100 sen as RM1.", bm: "Kumpul semula 100 sen = RM1." } },
+      { id: 6, icon: "🛒", title: { en: "6. Mini Market", bm: "6. Pasar Mini" }, sub: { en: "Calculate a shopping total.", bm: "Kira jumlah belian." } },
+      { id: 7, icon: "🎯", title: { en: "7. Agent Test", bm: "7. Ujian Ejen" }, sub: { en: "Complete final challenges.", bm: "Lengkapkan ujian akhir." } },
+      { id: 8, icon: "🏆", title: { en: "8. Final Rank", bm: "8. Pangkat Akhir" }, sub: { en: "Earn your agent rank.", bm: "Terima pangkat ejen anda." } }
+    ];
+
+    function getCurrentRankInfo() {
+      const doneCount = completedStages.filter(Boolean).length;
+      if (doneCount === 8) return { code: "RANK S", labelEn: "SUPREME AGENT", labelBm: "EJEN TERTINGGI", color: "text-[#ffdf59]" };
+      if (doneCount >= 6) return { code: "RANK A", labelEn: "ELITE OPERATIVE", labelBm: "OPERATIF ELIT", color: "text-[#34d399]" };
+      if (doneCount >= 4) return { code: "RANK B", labelEn: "FIELD SPECIALIST", labelBm: "PAKAR LAPANGAN", color: "text-[#21d4e5]" };
+      if (doneCount >= 2) return { code: "RANK C", labelEn: "JUNIOR AGENT", labelBm: "EJEN MUDA", color: "text-sky-300" };
+      return { code: "RANK E", labelEn: "CADET TRAINEE", labelBm: "KADET PELATIH", color: "text-slate-300" };
+    }
+
+    const i18nStrings = {
+      en: {
+        subtitle: "Ejen Ali: Financial Simulation & Agent Roadmap",
+        navRoadmap: "8-Stage Map",
+        roadmapHeader: "M.A.T.A 8-STAGE MISSION ROADMAP",
+        devSectionTitle: "DEVELOPER PROFILE",
+        devSectionSubtitle: "Learn more about the creator of this M.A.T.A Academy learning mission.",
+        devRoleBadge: "WEBSITE DEVELOPER",
+        btnChangePhoto: "Change Photo",
+        irisPopupSub: "Agent Financial Tactical Assistant",
+        irisWelcome: "Meow! Greetings Agent! I am I.R.I.S. with Comot. Ask me about Mission 2 & 3 (pass 3/5 questions), Gadget Lab's 1-minute scanner timer, or regrouping 100 sen as RM1!",
+        chipStageHint: "Hint for current stage",
+        chipRegroup: "How to regroup 100 sen?",
+        chipPlaceValue: "Explain Place Value",
+        btnSend: "Send",
+        comotCallout: "Ask I.R.I.S. / Comot!"
+      },
+      bm: {
+        subtitle: "Ejen Ali: Simulasi Kewangan & Peta Misi Ejen",
+        navRoadmap: "Peta 8 Misi",
+        roadmapHeader: "PETA LALUAN 8 MISI M.A.T.A",
+        devSectionTitle: "PROFIL PEMBANGUN",
+        devSectionSubtitle: "Ketahui lebih lanjut mengenai pencipta misi pembelajaran Akademi M.A.T.A ini.",
+        devRoleBadge: "PEMBANGUN LAMAN WEB",
+        btnChangePhoto: "Tukar Gambar",
+        irisPopupSub: "Pembantu Taktikal Kewangan Ejen",
+        irisWelcome: "Meow! Salam Ejen! Saya I.R.I.S. bersama Comot. Tanya saya tentang Misi 2 & 3 (lulus 3/5 soalan), pemasa 1 minit Gadget Lab, atau kumpul semula 100 sen = RM1!",
+        chipStageHint: "Petunjuk misi semasa",
+        chipRegroup: "Cara kumpul 100 sen?",
+        chipPlaceValue: "Terangkan Nilai Tempat",
+        btnSend: "Hantar",
+        comotCallout: "Tanya I.R.I.S. / Comot!"
+      }
+    };
+
+    // ==========================================
+    // 4. INITIALIZATION & NAVIGATION
+    // ==========================================
+    window.addEventListener('DOMContentLoaded', () => {
+      initMission2Round(false);
+      initMission3Round(false);
+      initMission5Round(false);
+      initMission7Round(false);
+      loadLockedDeveloperPhoto();
+      renderStagesGrid();
+      updateTopProgress();
+      renderActiveStageWorkspace();
+    });
+
+    function loadLockedDeveloperPhoto() {
+      try {
+        const saved = localStorage.getItem('mata_locked_dev_photo_v1');
+        const img = document.getElementById('devAvatarImg');
+        const overlay = document.getElementById('devPhotoLockOverlay');
+        if (saved && img) {
+          img.onerror = null;
+          img.src = saved;
+          if (overlay) overlay.remove();
+        }
+      } catch (e) {}
+    }
+
+    function lockDeveloperPhotoOnce(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        const img = document.getElementById('devAvatarImg');
+        const overlay = document.getElementById('devPhotoLockOverlay');
+        if (img) {
+          img.onerror = null;
+          img.src = dataUrl;
+        }
+        try {
+          localStorage.setItem('mata_locked_dev_photo_v1', dataUrl);
+        } catch (err) {}
+        if (overlay) overlay.remove();
+        showToast("PHOTO LOCKED", "Your real photo is now permanently locked on your Developer Profile!", "🔒");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const btnEN = document.getElementById('btnLangEN');
+      const btnBM = document.getElementById('btnLangBM');
+      if (btnEN && btnBM) {
+        btnEN.className = lang === 'en'
+          ? 'px-2.5 py-1 rounded-lg text-xs font-hud font-bold transition bg-[#21d4e5] text-[#07162b]'
+          : 'px-2.5 py-1 rounded-lg text-xs font-hud font-bold transition text-[#8fb2d4] hover:text-white';
+        btnBM.className = lang === 'bm'
+          ? 'px-2.5 py-1 rounded-lg text-xs font-hud font-bold transition bg-[#21d4e5] text-[#07162b]'
+          : 'px-2.5 py-1 rounded-lg text-xs font-hud font-bold transition text-[#8fb2d4] hover:text-white';
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18nStrings[lang] && i18nStrings[lang][key]) {
+          el.textContent = i18nStrings[lang][key];
+        }
+      });
+
+      const input = document.getElementById('irisUserInput');
+      if (input) {
+        input.placeholder = lang === 'en' ? "Ask I.R.I.S. & Comot anything..." : "Tanya I.R.I.S. & Comot apa sahaja...";
+      }
+
+      renderStagesGrid();
+      updateTopProgress();
+      renderActiveStageWorkspace();
+    }
+
+    function selectStage(stageId) {
+      // STRICT RULE FOR STAGE 4 (GADGET LAB):
+      // If leaving Gadget Lab before 60s completes, immediately stop timer & require retake
+      if (activeStage === 4 && stageId !== 4) {
+        if (gadgetTimerInterval) {
+          clearInterval(gadgetTimerInterval);
+          gadgetTimerInterval = null;
+        }
+        gadgetTimerRunning = false;
+
+        if (!completedStages[3]) {
+          gadgetNeedsRetake = true;
+          gadgetTimer = 60;
+          gadgetLabItems = [];
+          showToast(
+            currentLang === 'en' ? "STAGE 4 INCOMPLETE" : "MISI 4 TIDAK LENGKAP",
+            currentLang === 'en'
+              ? "Timer stopped early (< 1 min). You must retake Gadget Lab for a full 60s!"
+              : "Pemasa dihentikan awal (< 1 minit). Anda perlu ambil semula (Retake) Gadget Lab selama 60s penuh!",
+            "⚠️"
+          );
+        }
+      }
+
+      activeStage = stageId;
+      renderStagesGrid();
+      renderActiveStageWorkspace();
+      document.getElementById('stageWorkspaceSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function completeStage(stageId, xpReward = 150) {
+      const idx = stageId - 1;
+      if (!completedStages[idx]) {
+        completedStages[idx] = true;
+        totalXP += xpReward;
+        showToast(
+          currentLang === 'en' ? `STAGE ${stageId} COMPLETED!` : `MISI ${stageId} SELESAI!`,
+          currentLang === 'en' ? `+${xpReward} XP earned! Agent rank updated.` : `+${xpReward} XP diperoleh! Pangkat ejen dikemas kini.`,
+          "✅"
+        );
+      }
+      renderStagesGrid();
+      updateTopProgress();
+    }
+
+    function updateTopProgress() {
+      const doneCount = completedStages.filter(Boolean).length;
+      const pct = Math.round((doneCount / 8) * 100);
+      const rank = getCurrentRankInfo();
+
+      const bar = document.getElementById('roadmapProgressBar');
+      const label = document.getElementById('roadmapProgressLabel');
+      const hudXp = document.getElementById('hudXpDisplay');
+      const hudSt = document.getElementById('hudStageCounter');
+      const hudRank = document.getElementById('hudRankBadge');
+      const roadRank = document.getElementById('roadmapRankDisplay');
+
+      if (bar) bar.style.width = `${Math.max(4, pct)}%`;
+      if (label) {
+        label.textContent = currentLang === 'en'
+          ? `${doneCount} / 8 COMPLETED (${pct}%)`
+          : `${doneCount} / 8 SELESAI (${pct}%)`;
+      }
+      if (hudXp) hudXp.textContent = `${totalXP} XP`;
+      if (hudSt) hudSt.textContent = `${doneCount}/8`;
+      if (hudRank) {
+        hudRank.textContent = `${rank.code} (${currentLang === 'en' ? rank.labelEn : rank.labelBm})`;
+        hudRank.className = `font-hud font-black text-xs sm:text-sm ${rank.color}`;
+      }
+      if (roadRank) {
+        roadRank.textContent = currentLang === 'en'
+          ? `CURRENT RANK: ${rank.code} (${rank.labelEn})`
+          : `PANGKAT SEMASA: ${rank.code} (${rank.labelBm})`;
+      }
+    }
+
+    function renderStagesGrid() {
+      const container = document.getElementById('stagesGridContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      stagesMeta.forEach(st => {
+        const isDone = completedStages[st.id - 1];
+        const isActive = activeStage === st.id;
+        const isIncompleteFlag =
+          (st.id === 2 && m2NeedsRetake && !isDone) ||
+          (st.id === 3 && m3NeedsRetake && !isDone) ||
+          (st.id === 4 && gadgetNeedsRetake && !isDone) ||
+          (st.id === 5 && m5NeedsRetake && !isDone) ||
+          (st.id === 7 && m7NeedsRetake && !isDone);
+
+        const title = st.title[currentLang];
+        const sub = st.sub[currentLang];
+
+        const card = document.createElement('div');
+        card.onclick = () => selectStage(st.id);
+        card.className = `stage-card ${isActive ? 'active-stage' : ''} ${isDone ? 'completed-stage' : ''} ${isIncompleteFlag ? 'incomplete-stage' : ''}`;
+
+        let subHtml = `<div class="text-xs text-[#8fb2d4] mt-1">${sub}</div>`;
+        if (isDone) {
+          subHtml = `<div class="text-xs font-hud font-extrabold tracking-wider text-[#34d399] mt-1">✓ ${currentLang === 'en' ? 'COMPLETED' : 'SELESAI'}</div>`;
+        } else if (isIncompleteFlag) {
+          subHtml = `<div class="text-[11px] font-hud font-extrabold tracking-wider text-[#ff526b] mt-1">⚠️ ${currentLang === 'en' ? 'INCOMPLETE • RETAKE' : 'TIDAK LENGKAP • RETAKE'}</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="text-2xl sm:text-3xl mb-2 filter drop-shadow">${st.icon}</div>
+          <div class="font-bold text-sm sm:text-base text-white tracking-tight">${title}</div>
+          ${subHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // ==========================================
+    // 5. STAGE WORKSPACE RENDERERS (STAGES 1 TO 8)
+    // ==========================================
+    function renderActiveStageWorkspace() {
+      const box = document.getElementById('stageWorkspaceContent');
+      if (!box) return;
+
+      switch (activeStage) {
+        case 1: renderStage1Briefing(box); break;
+        case 2: renderStage2MoneyID(box); break;
+        case 3: renderStage3AddValues(box); break;
+        case 4: renderStage4GadgetLab(box); break;
+        case 5: renderStage5IrisProtocol(box); break;
+        case 6: renderStage6MiniMarket(box); break;
+        case 7: renderStage7AgentTest(box); break;
+        case 8: renderStage8FinalRank(box); break;
+      }
+    }
+
+    // --- STAGE 1: 1. Briefing ---
+    function renderStage1Briefing(box) {
+      box.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">📡</span>
+              <div>
+                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 01 / 08 • TRANSMISSION</div>
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                  ${currentLang === 'en' ? '1. MISSION BRIEFING: CYBERAYA FINANCIAL OPS' : '1. TAKLIMAT MISI: OPERASI KEWANGAN CYBERAYA'}
+                </h2>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${completedStages[0] ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ffdf59]/20 text-[#ffdf59] border border-[#ffdf59]/40'}">
+              ${completedStages[0] ? '✓ COMPLETED' : 'IN PROGRESS'}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <div class="lg:col-span-2 space-y-4 bg-[#07162b]/80 p-5 rounded-2xl border border-white/10">
+              <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                ${currentLang === 'en'
+                  ? 'Welcome to M.A.T.A Academy! To earn a high Agent Rank (up to RANK S), you must complete all 8 stages accurately:'
+                  : 'Selamat datang ke Akademi M.A.T.A! Untuk memperoleh Pangkat Ejen yang tinggi (sehingga RANK S), anda mesti melengkapkan kesemua 8 misi dengan tepat:'}
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                <div class="p-3 rounded-xl bg-[#102641] border border-[#21d4e5]/25">
+                  <div class="font-hud font-bold text-[#21d4e5]">💵 STAGE 2 & 3 (5 QUESTIONS EACH)</div>
+                  <p class="text-[#8fb2d4] mt-1">
+                    ${currentLang === 'en'
+                      ? 'Answer 5 randomized questions. Score at least 3/5 to pass; otherwise retake with fresh questions!'
+                      : 'Jawab 5 soalan rawak. Lulus sekurang-kurangnya 3/5; jika gagal perlu ambil semula soalan baharu!'}
+                  </p>
+                </div>
+                <div class="p-3 rounded-xl bg-[#102641] border border-[#ffdf59]/25">
+                  <div class="font-hud font-bold text-[#ffdf59]">🧪 STAGE 4 (GADGET LAB 1-MIN)</div>
+                  <p class="text-[#8fb2d4] mt-1">
+                    ${currentLang === 'en'
+                      ? 'Scan notes & coins for a full 60 seconds. Leaving early stops the timer and requires a retake!'
+                      : 'Imbas wang selama 60 saat penuh. Keluar awal akan hentikan pemasa dan perlu ambil semula!'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-[#07162b]/80 p-5 rounded-2xl border border-[#21d4e5]/30 flex flex-col justify-between space-y-4">
+              <div class="space-y-2">
+                <label class="font-hud text-xs font-bold uppercase text-[#21d4e5]">
+                  ${currentLang === 'en' ? 'ENTER AGENT CODENAME' : 'MASUKKAN NAMA KOD EJEN'}
+                </label>
+                <input id="briefingAgentInput" type="text" value="${agentName}" oninput="agentName = this.value.toUpperCase() || 'EJEN ALI'" class="w-full bg-[#102641] border border-[#21d4e5]/40 rounded-xl px-3.5 py-2.5 text-sm font-hud font-bold text-white outline-none focus:border-[#21d4e5]" />
+              </div>
+              <button type="button" onclick="completeStage(1, 100); selectStage(2);" class="btn-mint w-full py-3.5 rounded-xl font-hud text-sm uppercase tracking-wider">
+                ${currentLang === 'en' ? '✓ Acknowledge & Start Stage 2 →' : '✓ Sahkan & Mula Misi 2 →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- STAGE 2: 2. Money ID (5 Questions, Pass >= 3/5, Retake with new questions) ---
+    function renderStage2MoneyID(box) {
+      if (m2RoundQuestions.length === 0) initMission2Round(false);
+
+      // Summary Screen after 5 Questions
+      if (m2RoundFinished) {
+        const passed = m2Score >= 3;
+        box.innerHTML = `
+          <div class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">💵</span>
+                <div>
+                  <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 02 / 08 • EVALUATION</div>
+                  <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                    ${currentLang === 'en' ? '2. MONEY ID — MISSION RESULT' : '2. KENAL WANG — KEPUTUSAN MISI'}
+                  </h2>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${passed ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ff526b]/20 text-[#ff526b] border border-[#ff526b]/40'}">
+                ${passed ? '✓ COMPLETED' : '⚠️ INCOMPLETE'}
+              </span>
+            </div>
+
+            <div class="bg-[#07162b] border ${passed ? 'border-[#34d399]/50' : 'border-[#ff526b]/50'} rounded-2xl p-6 sm:p-8 text-center max-w-2xl mx-auto space-y-4">
+              <div class="text-5xl">${passed ? '🎖️' : '⚠️'}</div>
+              <div class="font-hud text-3xl sm:text-4xl font-black ${passed ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+                ${m2Score} / 5 ${currentLang === 'en' ? 'CORRECT' : 'BETUL'}
+              </div>
+              <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                ${passed
+                  ? (currentLang === 'en'
+                      ? 'Excellent work, Agent! You passed the minimum 3/5 requirement. Stage 2 is COMPLETED and your Agent Rank has advanced.'
+                      : 'Syabas, Ejen! Anda melepasi syarat minimum 3/5. Misi 2 telah SELESAI dan Pangkat Ejen anda meningkat.')
+                  : (currentLang === 'en'
+                      ? 'Mission Incomplete! You needed at least 3/5 correct answers. Your Agent Rank stays low until you retake this mission with a new set of questions.'
+                      : 'Misi Tidak Lengkap! Anda perlu sekurang-kurangnya 3/5 jawapan betul. Pangkat Ejen anda kekal rendah sehingga anda mengambil semula misi ini dengan set soalan baharu.')}
+              </p>
+
+              <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                ${passed ? `
+                  <button type="button" onclick="selectStage(3)" class="btn-mint px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    ${currentLang === 'en' ? 'Proceed to Stage 3: Add Values →' : 'Terus ke Misi 3: Tambah Nilai →'}
+                  </button>
+                  <button type="button" onclick="initMission2Round(true); renderActiveStageWorkspace();" class="px-5 py-3.5 rounded-xl bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-xs uppercase font-bold">
+                    🔄 ${currentLang === 'en' ? 'Practice New Set' : 'Latih Set Baharu'}
+                  </button>
+                ` : `
+                  <button type="button" onclick="initMission2Round(true); renderActiveStageWorkspace();" class="btn-red px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    🔄 ${currentLang === 'en' ? 'Retake With New Questions' : 'Ambil Semula Dengan Soalan Baharu'}
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const q = m2RoundQuestions[m2Index];
+      box.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">💵</span>
+              <div>
+                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 02 / 08 • PASS TARGET: ≥ 3 / 5</div>
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                  ${currentLang === 'en' ? '2. MONEY ID: CURRENCY IDENTIFICATION' : '2. KENAL WANG: PENGECAMAN MATA WANG'}
+                </h2>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold text-[#ffdf59]">
+                Q ${m2Index + 1} / 5
+              </span>
+              <span class="px-3 py-1 rounded-xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold text-[#34d399]">
+                ${currentLang === 'en' ? 'SCORE' : 'MARKAH'}: ${m2Score}/5
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-[#07162b] border border-white/10">
+              ${renderMalaysianCurrencyGraphic(q.specimen)}
+              <p class="text-xs text-[#8fb2d4] mt-3">
+                ${currentLang === 'en' ? 'Need at least 3/5 correct to complete Mission 2.' : 'Perlu sekurang-kurangnya 3/5 betul untuk lengkapkan Misi 2.'}
+              </p>
+            </div>
+
+            <div class="space-y-4">
+              <p class="text-base sm:text-lg font-bold text-white">${q.prompt[currentLang]}</p>
+              <div class="grid grid-cols-2 gap-3">
+                ${q.options.map((opt, idx) => {
+                  let btnStyle = "bg-[#102641] hover:bg-[#1a3a63] text-white border-[#21d4e5]/30";
+                  if (m2AnsweredCurrent) {
+                    if (idx === q.correct) {
+                      btnStyle = "bg-[#34d399]/25 text-[#34d399] border-[#34d399]";
+                    } else if (idx === m2SelectedOption) {
+                      btnStyle = "bg-[#ff526b]/25 text-[#ff526b] border-[#ff526b]";
+                    } else {
+                      btnStyle = "bg-[#0a1b31] text-[#8fb2d4] border-white/10 opacity-60";
+                    }
+                  }
+                  return `
+                    <button type="button" ${m2AnsweredCurrent ? 'disabled' : ''} onclick="answerStage2MoneyID(${idx})" class="p-4 rounded-xl border font-hud text-lg font-extrabold transition ${btnStyle}">
+                      ${opt}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              ${m2AnsweredCurrent ? `
+                <div class="pt-2 flex justify-end">
+                  <button type="button" onclick="nextStage2Question()" class="btn-cyan px-6 py-3 rounded-xl font-hud text-sm uppercase">
+                    ${m2Index < 4
+                      ? (currentLang === 'en' ? 'Next Question →' : 'Soalan Seterusnya →')
+                      : (currentLang === 'en' ? 'View Mission 2 Result →' : 'Lihat Keputusan Misi 2 →')}
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function answerStage2MoneyID(selectedIdx) {
+      if (m2AnsweredCurrent) return;
+      const q = m2RoundQuestions[m2Index];
+      m2AnsweredCurrent = true;
+      m2SelectedOption = selectedIdx;
+      if (selectedIdx === q.correct) {
+        m2Score++;
+        showToast("VERIFIED!", currentLang === 'en' ? `Correct: ${q.options[q.correct]}` : `Tepat sekali: ${q.options[q.correct]}`, "✅");
+      } else {
+        showToast("INCORRECT", currentLang === 'en' ? `Correct answer: ${q.options[q.correct]}` : `Jawapan betul: ${q.options[q.correct]}`, "❌");
+      }
+      renderActiveStageWorkspace();
+    }
+
+    function nextStage2Question() {
+      if (m2Index < 4) {
+        m2Index++;
+        m2AnsweredCurrent = false;
+        m2SelectedOption = null;
+        renderActiveStageWorkspace();
+      } else {
+        m2RoundFinished = true;
+        if (m2Score >= 3) {
+          m2NeedsRetake = false;
+          completeStage(2, 150);
+        } else {
+          completedStages[1] = false;
+          m2NeedsRetake = true;
+          renderStagesGrid();
+          updateTopProgress();
+          showToast(
+            currentLang === 'en' ? "MISSION 2 INCOMPLETE" : "MISI 2 TIDAK LENGKAP",
+            currentLang === 'en' ? `Score ${m2Score}/5 (< 3/5). Retake with new questions!` : `Markah ${m2Score}/5 (< 3/5). Sila ambil semula dengan soalan baharu!`,
+            "⚠️"
+          );
+        }
+        renderActiveStageWorkspace();
+      }
+    }
+
+    // --- STAGE 3: 3. Add Values (5 Questions, Pass >= 3/5, Retake with new questions) ---
+    function renderStage3AddValues(box) {
+      if (m3RoundQuestions.length === 0) initMission3Round(false);
+
+      // Summary Screen after 5 Questions
+      if (m3RoundFinished) {
+        const passed = m3Score >= 3;
+        box.innerHTML = `
+          <div class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">➕</span>
+                <div>
+                  <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 03 / 08 • EVALUATION</div>
+                  <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                    ${currentLang === 'en' ? '3. ADD VALUES — MISSION RESULT' : '3. TAMBAH NILAI — KEPUTUSAN MISI'}
+                  </h2>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${passed ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ff526b]/20 text-[#ff526b] border border-[#ff526b]/40'}">
+                ${passed ? '✓ COMPLETED' : '⚠️ INCOMPLETE'}
+              </span>
+            </div>
+
+            <div class="bg-[#07162b] border ${passed ? 'border-[#34d399]/50' : 'border-[#ff526b]/50'} rounded-2xl p-6 sm:p-8 text-center max-w-2xl mx-auto space-y-4">
+              <div class="text-5xl">${passed ? '⚡' : '⚠️'}</div>
+              <div class="font-hud text-3xl sm:text-4xl font-black ${passed ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+                ${m3Score} / 5 ${currentLang === 'en' ? 'CORRECT' : 'BETUL'}
+              </div>
+              <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                ${passed
+                  ? (currentLang === 'en'
+                      ? 'Great calculation, Agent! You passed the minimum 3/5 requirement. Stage 3 is COMPLETED and your rank has improved.'
+                      : 'Pengiraan hebat, Ejen! Anda melepasi syarat minimum 3/5. Misi 3 telah SELESAI dan pangkat anda meningkat.')
+                  : (currentLang === 'en'
+                      ? 'Mission Incomplete! You scored below 3/5. Your Agent Rank stays low until you retake Stage 3 with a fresh set of 5 questions.'
+                      : 'Misi Tidak Lengkap! Markah anda di bawah 3/5. Pangkat Ejen kekal rendah sehingga anda mengambil semula Misi 3 dengan 5 soalan baharu.')}
+              </p>
+
+              <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                ${passed ? `
+                  <button type="button" onclick="selectStage(4)" class="btn-mint px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    ${currentLang === 'en' ? 'Proceed to Stage 4: Gadget Lab →' : 'Terus ke Misi 4: Makmal Gajet →'}
+                  </button>
+                  <button type="button" onclick="initMission3Round(true); renderActiveStageWorkspace();" class="px-5 py-3.5 rounded-xl bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-xs uppercase font-bold">
+                    🔄 ${currentLang === 'en' ? 'Practice New Set' : 'Latih Set Baharu'}
+                  </button>
+                ` : `
+                  <button type="button" onclick="initMission3Round(true); renderActiveStageWorkspace();" class="btn-red px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    🔄 ${currentLang === 'en' ? 'Retake With New Questions' : 'Ambil Semula Dengan Soalan Baharu'}
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const q = m3RoundQuestions[m3Index];
+      box.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">➕</span>
+              <div>
+                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 03 / 08 • PASS TARGET: ≥ 3 / 5</div>
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                  ${currentLang === 'en' ? '3. ADD VALUES: COMBINE MONEY AMOUNTS' : '3. TAMBAH NILAI: GABUNGKAN JUMLAH WANG'}
+                </h2>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold text-[#ffdf59]">
+                Q ${m3Index + 1} / 5
+              </span>
+              <span class="px-3 py-1 rounded-xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold text-[#34d399]">
+                ${currentLang === 'en' ? 'SCORE' : 'MARKAH'}: ${m3Score}/5
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
+            <!-- Left Column: Equation Card -->
+            <div class="lg:col-span-5 flex flex-col items-center justify-center p-6 sm:p-8 rounded-2xl bg-[#07162b] border border-[#21d4e5]/30 text-center space-y-3">
+              <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#21d4e5]">
+                ${currentLang === 'en' ? 'ADDITION EQUATION' : 'PERSAMAAN TAMBAH'}
+              </div>
+              <div class="font-hud text-2xl sm:text-3xl font-black text-[#ffdf59]">
+                ${q.equation}
+              </div>
+              <p class="text-xs text-[#8fb2d4]">
+                ${currentLang === 'en' ? 'Pass at least 3/5 questions to complete Mission 3.' : 'Lulus sekurang-kurangnya 3/5 soalan untuk lengkapkan Misi 3.'}
+              </p>
+            </div>
+
+            <!-- Right Column: Answer Options -->
+            <div class="lg:col-span-7 space-y-4">
+              <p class="text-base sm:text-lg font-bold text-white">${q.prompt[currentLang]}</p>
+              <div class="grid grid-cols-2 gap-3">
+                ${q.options.map((opt, idx) => {
+                  let btnStyle = "bg-[#102641] hover:bg-[#1a3a63] text-white border-[#21d4e5]/30";
+                  if (m3AnsweredCurrent) {
+                    if (idx === q.correct) {
+                      btnStyle = "bg-[#34d399]/25 text-[#34d399] border-[#34d399]";
+                    } else if (idx === m3SelectedOption) {
+                      btnStyle = "bg-[#ff526b]/25 text-[#ff526b] border-[#ff526b]";
+                    } else {
+                      btnStyle = "bg-[#0a1b31] text-[#8fb2d4] border-white/10 opacity-60";
+                    }
+                  }
+                  return `
+                    <button type="button" ${m3AnsweredCurrent ? 'disabled' : ''} onclick="answerStage3AddValues(${idx})" class="p-4 rounded-xl border font-hud text-lg font-extrabold transition ${btnStyle}">
+                      ${opt}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+              ${m3AnsweredCurrent ? `
+                <div class="pt-2 flex justify-end">
+                  <button type="button" onclick="nextStage3Question()" class="btn-cyan px-6 py-3 rounded-xl font-hud text-sm uppercase">
+                    ${m3Index < 4
+                      ? (currentLang === 'en' ? 'Next Question →' : 'Soalan Seterusnya →')
+                      : (currentLang === 'en' ? 'View Mission 3 Result →' : 'Lihat Keputusan Misi 3 →')}
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function answerStage3AddValues(selectedIdx) {
+      if (m3AnsweredCurrent) return;
+      const q = m3RoundQuestions[m3Index];
+      m3AnsweredCurrent = true;
+      m3SelectedOption = selectedIdx;
+      if (selectedIdx === q.correct) {
+        m3Score++;
+        showToast("VERIFIED!", currentLang === 'en' ? `Correct: ${q.options[q.correct]}` : `Tepat sekali: ${q.options[q.correct]}`, "✅");
+      } else {
+        showToast("INCORRECT", currentLang === 'en' ? `Correct answer: ${q.options[q.correct]}` : `Jawapan betul: ${q.options[q.correct]}`, "❌");
+      }
+      renderActiveStageWorkspace();
+    }
+
+    function nextStage3Question() {
+      if (m3Index < 4) {
+        m3Index++;
+        m3AnsweredCurrent = false;
+        m3SelectedOption = null;
+        renderActiveStageWorkspace();
+      } else {
+        m3RoundFinished = true;
+        if (m3Score >= 3) {
+          m3NeedsRetake = false;
+          completeStage(3, 150);
+        } else {
+          completedStages[2] = false;
+          m3NeedsRetake = true;
+          renderStagesGrid();
+          updateTopProgress();
+          showToast(
+            currentLang === 'en' ? "MISSION 3 INCOMPLETE" : "MISI 3 TIDAK LENGKAP",
+            currentLang === 'en' ? `Score ${m3Score}/5 (< 3/5). Retake with new questions!` : `Markah ${m3Score}/5 (< 3/5). Sila ambil semula dengan soalan baharu!`,
+            "⚠️"
+          );
+        }
+        renderActiveStageWorkspace();
+      }
+    }
+
+    // --- STAGE 4: 4. Gadget Lab (Money Scanner + 60s Calibration Timer) ---
+    let gadgetTimerRunning = false;
+    let gadgetTimerInterval = null;
+    let gadgetNeedsRetake = false;
+
+    const gadgetScannerDenominations = [
+      { label: "RM100", sub: "+ RM100", value: 100.00 },
+      { label: "RM50",  sub: "+ RM50",  value: 50.00 },
+      { label: "RM20",  sub: "+ RM20",  value: 20.00 },
+      { label: "RM10",  sub: "+ RM10",  value: 10.00 },
+      { label: "RM5",   sub: "+ RM5",   value: 5.00 },
+      { label: "RM1",   sub: "+ RM1",   value: 1.00 },
+      { label: "50 sen", sub: "+ 50 sen", value: 0.50 },
+      { label: "20 sen", sub: "+ 20 sen", value: 0.20 },
+      { label: "10 sen", sub: "+ 10 sen", value: 0.10 },
+      { label: "5 sen",  sub: "+ 5 sen",  value: 0.05 }
+    ];
+
+    function startGadgetLabTimer() {
+      if (completedStages[3] || gadgetTimerRunning) return;
+      gadgetTimerRunning = true;
+      gadgetTimerInterval = setInterval(() => {
+        if (activeStage !== 4) {
+          clearInterval(gadgetTimerInterval);
+          gadgetTimerInterval = null;
+          gadgetTimerRunning = false;
+          return;
+        }
+        if (gadgetTimer > 0) {
+          gadgetTimer--;
+          const timerText = document.getElementById('gadgetTimerDisplay');
+          const timerBar = document.getElementById('gadgetTimerBar');
+          if (timerText) {
+            const mins = Math.floor(gadgetTimer / 60).toString().padStart(2, '0');
+            const secs = (gadgetTimer % 60).toString().padStart(2, '0');
+            timerText.textContent = `${mins}:${secs}`;
+          }
+          if (timerBar) {
+            const pctDone = Math.round(((60 - gadgetTimer) / 60) * 100);
+            timerBar.style.width = `${pctDone}%`;
+          }
+        }
+        if (gadgetTimer <= 0) {
+          clearInterval(gadgetTimerInterval);
+          gadgetTimerInterval = null;
+          gadgetTimerRunning = false;
+          gadgetNeedsRetake = false;
+          completeStage(4, 200);
+          renderActiveStageWorkspace();
+        }
+      }, 1000);
+    }
+
+    function renderStage4GadgetLab(box) {
+      if (!completedStages[3] && !gadgetTimerRunning) {
+        startGadgetLabTimer();
+      }
+
+      const currentSum = gadgetLabItems.reduce((acc, v) => acc + v, 0);
+      const itemCount = gadgetLabItems.length;
+      const wholeRM = Math.floor(currentSum + 0.0001);
+      const senPart = Math.round((currentSum - wholeRM) * 100);
+      const hundredsDigit = Math.floor((wholeRM % 1000) / 100);
+      const tensDigit = Math.floor((wholeRM % 100) / 10);
+      const onesDigit = wholeRM % 10;
+
+      const mins = Math.floor(gadgetTimer / 60).toString().padStart(2, '0');
+      const secs = (gadgetTimer % 60).toString().padStart(2, '0');
+      const pctDone = completedStages[3] ? 100 : Math.round(((60 - gadgetTimer) / 60) * 100);
+
+      box.innerHTML = `
+        <div class="space-y-6">
+          <!-- Header -->
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#21d4e5] to-[#0284c7] flex items-center justify-center text-2xl shadow-lg">
+                🧪
+              </div>
+              <div>
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white tracking-wide">
+                  GADGET LAB: MONEY SCANNER
+                </h2>
+                <p class="text-xs sm:text-sm text-[#8fb2d4]">
+                  ${currentLang === 'en'
+                    ? 'Tap banknotes and coins. The scanner calculates the total and shows the place values.'
+                    : 'Tekan wang kertas dan syiling. Pengimbas mengira jumlah dan memaparkan nilai tempat.'}
+                </p>
+              </div>
+            </div>
+
+            <!-- 60s Calibration Timer Pill -->
+            <div class="flex items-center gap-3 bg-[#07162b] px-4 py-2.5 rounded-2xl border ${completedStages[3] ? 'border-[#34d399]/50' : 'border-[#ffdf59]/50'}">
+              <div>
+                <div class="font-hud text-[10px] font-bold uppercase text-[#8fb2d4]">
+                  ${currentLang === 'en' ? '1-MIN CALIBRATION TIMER' : 'PEMASA KALIBRASI 1-MINIT'}
+                </div>
+                <div id="gadgetTimerDisplay" class="font-hud text-xl font-black ${completedStages[3] ? 'text-[#34d399]' : 'text-[#ffdf59]'}">
+                  ${completedStages[3] ? 'COMPLETED' : `${mins}:${secs}`}
+                </div>
+              </div>
+              ${gadgetNeedsRetake && !completedStages[3] ? `
+                <button type="button" onclick="retakeStage4GadgetLab()" class="btn-red px-3 py-1.5 rounded-xl font-hud text-xs uppercase">
+                  🔄 RETAKE
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- 60s Progress Bar -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-hud font-bold text-[#8fb2d4]">
+              <span>
+                ${completedStages[3]
+                  ? (currentLang === 'en' ? '✓ Full 60s calibration completed!' : '✓ Kalibrasi penuh 60s selesai!')
+                  : (currentLang === 'en' ? 'Stay in Gadget Lab until 00:00 (switching early resets timer & requires retake)' : 'Kekal dalam Gadget Lab sehingga 00:00 (tukar misi awal akan set semula pemasa)')}
+              </span>
+              <span class="text-[#21d4e5]">${pctDone}%</span>
+            </div>
+            <div class="w-full h-2 bg-[#07162b] rounded-full overflow-hidden">
+              <div id="gadgetTimerBar" class="h-full bg-gradient-to-r from-[#21d4e5] to-[#34d399] transition-all duration-500" style="width: ${pctDone}%;"></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
+            <!-- Left Column: SELECT MONEY ITEMS -->
+            <div class="lg:col-span-6 space-y-4">
+              <div class="font-hud text-xs font-extrabold uppercase tracking-wider text-[#21d4e5]">
+                ${currentLang === 'en' ? 'SELECT MONEY ITEMS' : 'PILIH ITEM WANG'}
+              </div>
+              <div class="grid grid-cols-3 gap-2.5">
+                ${gadgetScannerDenominations.map(d => `
+                  <button
+                    type="button"
+                    onclick="addGadgetLabItem(${d.value})"
+                    class="p-3 rounded-xl bg-[#0b203b] hover:bg-[#133159] border border-[#21d4e5]/30 hover:border-[#21d4e5] transition text-center group"
+                  >
+                    <div class="font-hud text-base sm:text-lg font-extrabold text-[#ffdf59] group-hover:scale-105 transition">${d.label}</div>
+                    <div class="text-[11px] text-[#8fb2d4] mt-0.5">${d.sub}</div>
+                  </button>
+                `).join('')}
+              </div>
+
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button
+                  type="button"
+                  onclick="resetGadgetLabScanner()"
+                  class="flex-1 py-3 px-4 rounded-xl bg-[#07162b] hover:bg-[#102641] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-xs font-extrabold uppercase tracking-wider transition"
+                >
+                  ↺ ${currentLang === 'en' ? 'RESET SCANNER' : 'SET SEMULA'}
+                </button>
+                <button
+                  type="button"
+                  onclick="randomGadgetLabSample()"
+                  class="flex-1 btn-yellow py-3 px-4 rounded-xl font-hud text-xs font-extrabold uppercase tracking-wider"
+                >
+                  ⚡ ${currentLang === 'en' ? 'RANDOM SAMPLE' : 'SAMPEL RAWAK'}
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Column: TOTAL ENERGY / MONEY VALUE & Place Value Scanner -->
+            <div class="lg:col-span-6 space-y-4">
+              <div class="rounded-2xl bg-[#07162b] border border-[#21d4e5]/35 p-6 text-center space-y-1.5">
+                <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#21d4e5]">
+                  ${currentLang === 'en' ? 'TOTAL ENERGY / MONEY VALUE' : 'JUMLAH TENAGA / NILAI WANG'}
+                </div>
+                <div class="font-hud text-4xl sm:text-5xl font-black text-[#ffdf59] tracking-tight">
+                  RM${currentSum.toFixed(2)}
+                </div>
+                <div class="text-xs text-[#8fb2d4]">
+                  ${itemCount} ${currentLang === 'en' ? 'items scanned' : 'item diimbas'}
+                </div>
+              </div>
+
+              <div class="space-y-2.5">
+                <div class="font-bold text-sm text-white">
+                  ${currentLang === 'en' ? 'Place Value Scanner' : 'Pengimbas Nilai Tempat'}
+                </div>
+                <div class="grid grid-cols-5 gap-2 text-center">
+                  <div class="p-3 rounded-xl bg-[#0b203b] border border-white/10">
+                    <div class="text-[9px] font-hud font-bold uppercase text-[#8fb2d4]">${currentLang === 'en' ? 'HUNDREDS' : 'RATUS'}</div>
+                    <div class="font-hud text-xl font-black text-white mt-1">${hundredsDigit}</div>
+                  </div>
+                  <div class="p-3 rounded-xl bg-[#0b203b] border border-white/10">
+                    <div class="text-[9px] font-hud font-bold uppercase text-[#8fb2d4]">${currentLang === 'en' ? 'TENS' : 'PULUH'}</div>
+                    <div class="font-hud text-xl font-black text-white mt-1">${tensDigit}</div>
+                  </div>
+                  <div class="p-3 rounded-xl bg-[#0b203b] border border-white/10">
+                    <div class="text-[9px] font-hud font-bold uppercase text-[#8fb2d4]">${currentLang === 'en' ? 'ONES' : 'SA'}</div>
+                    <div class="font-hud text-xl font-black text-white mt-1">${onesDigit}</div>
+                  </div>
+                  <div class="p-3 rounded-xl bg-[#0b203b] border border-white/10">
+                    <div class="text-[9px] font-hud font-bold uppercase text-[#8fb2d4]">${currentLang === 'en' ? 'DECIMAL' : 'TITIK'}</div>
+                    <div class="font-hud text-xl font-black text-[#21d4e5] mt-1">.</div>
+                  </div>
+                  <div class="p-3 rounded-xl bg-[#0b203b] border border-white/10">
+                    <div class="text-[9px] font-hud font-bold uppercase text-[#8fb2d4]">SEN</div>
+                    <div class="font-hud text-xl font-black text-[#ffdf59] mt-1">${senPart.toString().padStart(2, '0')}</div>
+                  </div>
+                </div>
+                <div class="text-xs text-[#8fb2d4]">
+                  Ringgit: RM${wholeRM} • Sen: ${senPart} • 100 sen = RM1.00
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function addGadgetLabItem(val) {
+      gadgetLabItems.push(val);
+      renderActiveStageWorkspace();
+    }
+
+    function resetGadgetLabScanner() {
+      gadgetLabItems = [];
+      renderActiveStageWorkspace();
+    }
+
+    function randomGadgetLabSample() {
+      gadgetLabItems = [];
+      const count = 3 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) {
+        const randItem = gadgetScannerDenominations[Math.floor(Math.random() * gadgetScannerDenominations.length)];
+        gadgetLabItems.push(randItem.value);
+      }
+      renderActiveStageWorkspace();
+    }
+
+    function retakeStage4GadgetLab() {
+      if (gadgetTimerInterval) {
+        clearInterval(gadgetTimerInterval);
+        gadgetTimerInterval = null;
+      }
+      completedStages[3] = false;
+      gadgetNeedsRetake = false;
+      gadgetTimer = 60;
+      gadgetTimerRunning = false;
+      gadgetLabItems = [];
+      renderStagesGrid();
+      updateTopProgress();
+      renderActiveStageWorkspace();
+    }
+
+    // --- STAGE 5: 5. IRIS Protocol (3 Missions, Pass >= 2/3, Retake with new missions) ---
+    function renderStage5IrisProtocol(box) {
+      if (m5RoundMissions.length === 0) initMission5Round(false);
+
+      if (m5RoundFinished) {
+        const passed = m5Score >= 2;
+        box.innerHTML = `
+          <div class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">💡</span>
+                <div>
+                  <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 05 / 08 • EVALUATION</div>
+                  <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                    ${currentLang === 'en' ? 'Mission 5: IRIS Protocol — Result' : 'Misi 5: Protokol IRIS — Keputusan'}
+                  </h2>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${passed ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ff526b]/20 text-[#ff526b] border border-[#ff526b]/40'}">
+                ${passed ? (currentLang === 'en' ? '✓ COMPLETED' : '✓ SELESAI') : (currentLang === 'en' ? '⚠️ INCOMPLETE' : '⚠️ TIDAK LENGKAP')}
+              </span>
+            </div>
+
+            <div class="bg-[#07162b] border ${passed ? 'border-[#34d399]/50' : 'border-[#ff526b]/50'} rounded-2xl p-6 sm:p-8 text-center max-w-2xl mx-auto space-y-4">
+              <div class="text-5xl">${passed ? '💡' : '⚠️'}</div>
+              <div class="font-hud text-3xl sm:text-4xl font-black ${passed ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+                ${m5Score} / 3 ${currentLang === 'en' ? 'CORRECT' : 'BETUL'}
+              </div>
+              <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                ${passed
+                  ? (currentLang === 'en'
+                      ? 'Great regrouping, Agent! You passed at least 2 out of 3 IRIS Protocol missions. Stage 5 is now COMPLETED!'
+                      : 'Pengumpulan semula yang hebat, Ejen! Anda lulus sekurang-kurangnya 2 daripada 3 misi Protokol IRIS. Misi 5 kini SELESAI!')
+                  : (currentLang === 'en'
+                      ? 'Mission 5 Incomplete! You need at least 2/3 correct answers to pass. Retake the 3 IRIS Protocol missions with fresh values!'
+                      : 'Misi 5 Tidak Lengkap! Anda perlu sekurang-kurangnya 2/3 jawapan betul untuk lulus. Ambil semula 3 misi Protokol IRIS dengan nilai baharu!')}
+              </p>
+
+              <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                ${passed ? `
+                  <button type="button" onclick="selectStage(6)" class="btn-mint px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    ${currentLang === 'en' ? 'Proceed to Stage 6: Mini Market →' : 'Terus ke Misi 6: Pasar Mini →'}
+                  </button>
+                  <button type="button" onclick="initMission5Round(true); renderActiveStageWorkspace();" class="px-5 py-3.5 rounded-xl bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-xs uppercase font-bold">
+                    🔄 ${currentLang === 'en' ? 'Practice 3 New Missions' : 'Latih 3 Misi Baharu'}
+                  </button>
+                ` : `
+                  <button type="button" onclick="initMission5Round(true); renderActiveStageWorkspace();" class="btn-red px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    🔄 ${currentLang === 'en' ? 'Retake With 3 New Missions' : 'Ambil Semula Dengan 3 Misi Baharu'}
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const cur = m5RoundMissions[m5Index];
+
+      box.innerHTML = `
+        <div class="space-y-6">
+          <!-- Top Header matching Screenshot -->
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="space-y-1.5">
+              <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#21d4e5]">
+                ${currentLang === 'en' ? 'SELECT A MISSION • PASS TARGET: ≥ 2 / 3' : 'PILIH MISI • SASARAN LULUS: ≥ 2 / 3'}
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                ${currentLang === 'en' ? 'Mission 5: IRIS Protocol' : 'Misi 5: Protokol IRIS'}
+              </h2>
+              <p class="text-sm sm:text-base text-[#8fb2d4] pt-1">
+                ${currentLang === 'en' ? 'Regroup every 100 sen as RM1.00.' : 'Kumpul semula setiap 100 sen sebagai RM1.00.'}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold bg-[#ffdf59]/15 text-[#ffdf59] border border-[#ffdf59]/40">
+                ${currentLang === 'en' ? `MISSION ${m5Index + 1} / 3` : `MISI ${m5Index + 1} / 3`}
+              </span>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold bg-[#34d399]/15 text-[#34d399] border border-[#34d399]/40">
+                ${currentLang === 'en' ? 'SCORE' : 'MARKAH'}: ${m5Score}/3
+              </span>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold bg-[#21d4e5]/20 text-[#21d4e5] border border-[#21d4e5]/40">
+                STAGE 05 / 08
+              </span>
+            </div>
+          </div>
+
+          <!-- Prompt & Horizontal Simulator Input Row -->
+          <div class="space-y-4">
+            <p class="text-sm sm:text-base font-bold text-white">
+              ${currentLang === 'en'
+                ? `Mission ${m5Index + 1} of 3: Try the IRIS regrouping simulator. Add ${cur.a} sen and ${cur.b} sen.`
+                : `Misi ${m5Index + 1} daripada 3: Cuba simulator pengumpulan semula IRIS. Tambah ${cur.a} sen dan ${cur.b} sen.`}
+            </p>
+
+            <div class="flex flex-wrap items-center gap-3">
+              <input
+                id="irisInputSenA"
+                type="number"
+                min="0"
+                max="9999"
+                value="${irisSenA}"
+                placeholder="?"
+                oninput="irisSenA = this.value"
+                aria-label="First sen amount"
+                class="w-24 sm:w-28 h-12 sm:h-14 rounded-2xl bg-[#091c34] border border-white/20 focus:border-[#21d4e5] px-4 text-base sm:text-lg font-bold text-white placeholder-[#8fb2d4]/50 outline-none transition"
+              />
+              <span class="text-lg font-extrabold text-white">+</span>
+              <input
+                id="irisInputSenB"
+                type="number"
+                min="0"
+                max="9999"
+                value="${irisSenB}"
+                placeholder="?"
+                oninput="irisSenB = this.value"
+                aria-label="Second sen amount"
+                class="w-24 sm:w-28 h-12 sm:h-14 rounded-2xl bg-[#091c34] border border-white/20 focus:border-[#21d4e5] px-4 text-base sm:text-lg font-bold text-white placeholder-[#8fb2d4]/50 outline-none transition"
+              />
+              <span class="text-base sm:text-lg font-semibold text-slate-200 px-1">sen</span>
+              <button
+                type="button"
+                onclick="runIrisProtocolSimulation()"
+                class="btn-yellow h-12 sm:h-14 px-6 rounded-2xl font-hud text-xs sm:text-sm font-extrabold uppercase tracking-wider"
+              >
+                ${currentLang === 'en' ? 'RUN SIMULATION' : 'JALANKAN SIMULASI'}
+              </button>
+            </div>
+          </div>
+
+          ${irisSimResult ? `
+            <div class="rounded-2xl bg-[#091c34] border border-[#34d399]/45 p-5 space-y-2.5">
+              <div class="font-hud text-xs font-extrabold uppercase tracking-wider text-[#34d399]">
+                ${currentLang === 'en' ? 'I.R.I.S. REGROUPING OUTPUT' : 'HASIL PENGUMPULAN SEMULA I.R.I.S.'}
+              </div>
+              <div class="text-sm sm:text-base text-slate-200">
+                <strong class="text-white">${irisSimResult.a} sen + ${irisSimResult.b} sen = ${irisSimResult.totalSen} sen</strong>
+              </div>
+              <div class="text-xs sm:text-sm text-[#8fb2d4]">
+                ${currentLang === 'en'
+                  ? `Regroup ${irisSimResult.ringgit * 100} sen → <span class="text-[#ffdf59] font-bold">RM${irisSimResult.ringgit}.00</span> + remaining <span class="text-white font-bold">${irisSimResult.remSen} sen</span>`
+                  : `Kumpul semula ${irisSimResult.ringgit * 100} sen → <span class="text-[#ffdf59] font-bold">RM${irisSimResult.ringgit}.00</span> + baki <span class="text-white font-bold">${irisSimResult.remSen} sen</span>`}
+              </div>
+              <div class="font-hud text-2xl sm:text-3xl font-black text-[#34d399] pt-1">
+                ${currentLang === 'en' ? 'FINAL VALUE' : 'NILAI AKHIR'}: RM${irisSimResult.ringgit}.${irisSimResult.remSen.toString().padStart(2, '0')}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Answer Verification Choices for Current IRIS Sub-Mission -->
+          <div class="rounded-2xl bg-[#07162b]/90 border border-[#21d4e5]/25 p-5 space-y-4">
+            <div class="font-hud text-xs font-extrabold uppercase tracking-wider text-[#21d4e5]">
+              ${currentLang === 'en'
+                ? `VERIFY MISSION ${m5Index + 1} ANSWER (${cur.a} sen + ${cur.b} sen)`
+                : `SAHKAN JAWAPAN MISI ${m5Index + 1} (${cur.a} sen + ${cur.b} sen)`}
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              ${cur.options.map((opt, idx) => {
+                let btnStyle = "bg-[#102641] hover:bg-[#1a3a63] text-white border-[#21d4e5]/30";
+                if (m5AnsweredCurrent) {
+                  if (idx === cur.correct) {
+                    btnStyle = "bg-[#34d399]/25 text-[#34d399] border-[#34d399]";
+                  } else if (idx === m5SelectedOption) {
+                    btnStyle = "bg-[#ff526b]/25 text-[#ff526b] border-[#ff526b]";
+                  } else {
+                    btnStyle = "bg-[#0a1b31] text-[#8fb2d4] border-white/10 opacity-60";
+                  }
+                }
+                return `
+                  <button type="button" ${m5AnsweredCurrent ? 'disabled' : ''} onclick="answerStage5IrisMission(${idx})" class="p-3.5 rounded-xl border font-hud text-base sm:text-lg font-extrabold transition ${btnStyle}">
+                    ${opt}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            ${m5AnsweredCurrent ? `
+              <div class="pt-1 flex justify-end">
+                <button type="button" onclick="nextStage5IrisMission()" class="btn-cyan px-6 py-3 rounded-xl font-hud text-xs sm:text-sm uppercase">
+                  ${m5Index < 2
+                    ? (currentLang === 'en' ? 'Next IRIS Mission →' : 'Misi IRIS Seterusnya →')
+                    : (currentLang === 'en' ? 'View Mission 5 Result →' : 'Lihat Keputusan Misi 5 →')}
+                </button>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="flex flex-col items-start gap-3 pt-2">
+            <button
+              type="button"
+              onclick="toggleIrisLesson()"
+              class="px-5 py-3 rounded-2xl bg-[#0b203b] hover:bg-[#133159] text-[#21d4e5] border border-[#21d4e5]/45 font-hud text-xs sm:text-sm font-extrabold uppercase tracking-wider transition"
+            >
+              ${irisLessonOpen
+                ? (currentLang === 'en' ? 'CLOSE IRIS LESSON ↑' : 'TUTUP PELAJARAN IRIS ↑')
+                : (currentLang === 'en' ? 'OPEN IRIS LESSON ↓' : 'BUKA PELAJARAN IRIS ↓')}
+            </button>
+
+            ${irisLessonOpen ? `
+              <div class="w-full rounded-2xl bg-[#07162b] border border-[#21d4e5]/30 p-5 space-y-2 text-xs sm:text-sm text-slate-200">
+                <div class="font-hud text-xs font-extrabold uppercase text-[#ffdf59]">
+                  ${currentLang === 'en' ? 'I.R.I.S. CONCEPT NOTE: 100 SEN = RM1.00' : 'NOTA KONSEP I.R.I.S.: 100 SEN = RM1.00'}
+                </div>
+                <p>
+                  ${currentLang === 'en'
+                    ? 'Whenever the sum of sen is 100 or more, group every 100 sen into RM1.00 and keep the leftover sen after the decimal point. Example: 75 sen + 45 sen = 120 sen = RM1.20.'
+                    : 'Apabila jumlah sen mencapai 100 atau lebih, kumpulkan setiap 100 sen menjadi RM1.00 dan letakkan baki sen selepas titik perpuluhan. Contoh: 75 sen + 45 sen = 120 sen = RM1.20.'}
+                </p>
+              </div>
+            ` : ''}
+
+            <button
+              type="button"
+              onclick="document.getElementById('missionRoadmapSection').scrollIntoView({ behavior: 'smooth' })"
+              class="px-5 py-3 rounded-2xl bg-[#0b203b] hover:bg-[#133159] text-[#21d4e5] border border-[#21d4e5]/45 font-hud text-xs sm:text-sm font-extrabold uppercase tracking-wider transition"
+            >
+              ${currentLang === 'en' ? '↩ BACK TO MISSION BOARD' : '↩ KEMBALI KE PAPAN MISI'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function runIrisProtocolSimulation() {
+      const inputA = document.getElementById('irisInputSenA');
+      const inputB = document.getElementById('irisInputSenB');
+      if (inputA) irisSenA = inputA.value;
+      if (inputB) irisSenB = inputB.value;
+
+      if (irisSenA === '' || irisSenB === '') {
+        showToast(
+          currentLang === 'en' ? "INPUT REQUIRED" : "INPUT DIPERLUKAN",
+          currentLang === 'en' ? "Type both sen numbers into the boxes yourself first!" : "Taip kedua-dua nombor sen ke dalam kotak sendiri dahulu!",
+          "💡"
+        );
+        return;
+      }
+
+      const numA = Math.max(0, parseInt(irisSenA, 10) || 0);
+      const numB = Math.max(0, parseInt(irisSenB, 10) || 0);
+      const totalSen = numA + numB;
+      const ringgit = Math.floor(totalSen / 100);
+      const remSen = totalSen % 100;
+
+      irisSimResult = { a: numA, b: numB, totalSen, ringgit, remSen };
+      renderActiveStageWorkspace();
+    }
+
+    function answerStage5IrisMission(selectedIdx) {
+      if (m5AnsweredCurrent) return;
+      const cur = m5RoundMissions[m5Index];
+      m5AnsweredCurrent = true;
+      m5SelectedOption = selectedIdx;
+      if (selectedIdx === cur.correct) {
+        m5Score++;
+        showToast("REGROUP VERIFIED!", currentLang === 'en' ? `Correct: ${cur.options[cur.correct]}` : `Tepat sekali: ${cur.options[cur.correct]}`, "✅");
+      } else {
+        showToast("INCORRECT", currentLang === 'en' ? `Correct answer: ${cur.options[cur.correct]}` : `Jawapan betul: ${cur.options[cur.correct]}`, "❌");
+      }
+      renderActiveStageWorkspace();
+    }
+
+    function nextStage5IrisMission() {
+      if (m5Index < 2) {
+        m5Index++;
+        m5AnsweredCurrent = false;
+        m5SelectedOption = null;
+        irisSimResult = null;
+        irisSenA = '';
+        irisSenB = '';
+        renderActiveStageWorkspace();
+      } else {
+        m5RoundFinished = true;
+        if (m5Score >= 2) {
+          m5NeedsRetake = false;
+          completeStage(5, 150);
+        } else {
+          completedStages[4] = false;
+          m5NeedsRetake = true;
+          renderStagesGrid();
+          updateTopProgress();
+          showToast(
+            currentLang === 'en' ? "MISSION 5 INCOMPLETE" : "MISI 5 TIDAK LENGKAP",
+            currentLang === 'en' ? `Score ${m5Score}/3 (< 2/3). Retake with 3 new missions!` : `Markah ${m5Score}/3 (< 2/3). Sila ambil semula 3 misi baharu!`,
+            "⚠️"
+          );
+        }
+        renderActiveStageWorkspace();
+      }
+    }
+
+    function toggleIrisLesson() {
+      irisLessonOpen = !irisLessonOpen;
+      renderActiveStageWorkspace();
+    }
+
+    // --- STAGE 6: 6. Mini Market (Misi Bajet RM20.00 Ejen Ali + Pengimbas Baki Wang) ---
+    const marketBudgetCatalog = [
+      { id: 1, icon: "🍱", name: { en: "Nasi Lemak & Mineral Water", bm: "Nasi Lemak & Air Mineral" }, price: 4.50, type: "need" },
+      { id: 2, icon: "📓", name: { en: "M.A.T.A Tactical Notebook", bm: "Buku Nota Taktikal M.A.T.A" }, price: 3.50, type: "need" },
+      { id: 3, icon: "✏️", name: { en: "Complete Stationery Set", bm: "Set Alat Tulis Lengkap" }, price: 5.00, type: "need" },
+      { id: 4, icon: "🏦", name: { en: "Emergency Savings Deposit", bm: "Tabung Simpanan Kecemasan" }, price: 4.00, type: "need" },
+      { id: 5, icon: "🪀", name: { en: "Limited Edition Yoyo Toy", bm: "Mainan Yoyo Edisi Terhad" }, price: 9.50, type: "want" },
+      { id: 6, icon: "🍬", name: { en: "Candies & Sweet Snacks", bm: "Gula-gula & Snek Manis" }, price: 6.00, type: "want" }
+    ];
+
+    function renderStage6MiniMarket(box) {
+      const totalSpent = marketSelectedIds.reduce((acc, id) => {
+        const item = marketBudgetCatalog.find(x => x.id === id);
+        return acc + (item ? item.price : 0);
+      }, 0);
+      const remainingBudget = 20.00 - totalSpent;
+
+      const fbClasses = {
+        success: "bg-[#34d399]/15 border border-[#34d399]/45 text-[#34d399]",
+        warning: "bg-[#ffdf59]/15 border border-[#ffdf59]/45 text-[#ffdf59]",
+        error:   "bg-[#ff526b]/15 border border-[#ff526b]/45 text-[#ff526b]"
+      };
+
+      box.innerHTML = `
+        <div class="space-y-6">
+          <!-- Panel 1: Misi Bajet RM20.00 Ejen Ali -->
+          <div class="rounded-2xl bg-[#07162b]/95 border border-[#21d4e5]/30 p-5 sm:p-6 space-y-5 shadow-xl">
+            <div class="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#21d4e5]">
+                  ${currentLang === 'en' ? 'ACADEMY SIMULATION • STAGE 06 / 08' : 'SIMULASI AKADEMI • MISI 06 / 08'}
+                </div>
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white mt-0.5">
+                  ${currentLang === 'en' ? 'Agent Ali RM20.00 Budget Mission' : 'Misi Bajet RM20.00 Ejen Ali'}
+                </h2>
+              </div>
+
+              <div class="text-right">
+                <div class="text-[11px] font-hud font-bold uppercase text-[#8fb2d4]">
+                  ${currentLang === 'en' ? 'REMAINING BUDGET' : 'BAKI BAJET MISI'}
+                </div>
+                <div class="font-hud text-2xl sm:text-3xl font-black ${remainingBudget >= 0 ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+                  RM ${remainingBudget.toFixed(2)}
+                </div>
+              </div>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              ${currentLang === 'en'
+                ? 'Select items to pack into your mission bag. Make sure total spending does not exceed <strong class="text-[#21d4e5]">RM20.00</strong> and prioritize needs!'
+                : 'Pilih item untuk dimasukkan ke dalam beg misi anda. Pastikan jumlah perbelanjaan tidak melebihi <strong class="text-[#21d4e5]">RM20.00</strong> dan utamakan keperluan!'}
+            </p>
+
+            <!-- 2-Column Item Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              ${marketBudgetCatalog.map(item => {
+                const selected = marketSelectedIds.includes(item.id);
+                const isNeed = item.type === 'need';
+                const tagLabel = isNeed
+                  ? (currentLang === 'en' ? 'Need' : 'Keperluan')
+                  : (currentLang === 'en' ? 'Want' : 'Kehendak');
+                const tagStyle = isNeed
+                  ? 'bg-[#34d399]/15 text-[#34d399] border-[#34d399]/40'
+                  : 'bg-[#ffdf59]/15 text-[#ffdf59] border-[#ffdf59]/40';
+
+                return `
+                  <div
+                    onclick="toggleMarketBudgetItem(${item.id})"
+                    class="p-4 rounded-2xl border transition cursor-pointer flex items-center justify-between gap-3 ${
+                      selected
+                        ? 'bg-[#21d4e5]/15 border-[#21d4e5] shadow-[0_0_16px_rgba(33,212,229,0.2)]'
+                        : 'bg-[#0b1f3a] border-white/10 hover:border-[#21d4e5]/45'
+                    }"
+                  >
+                    <div class="flex items-center gap-3.5">
+                      <span class="text-2xl sm:text-3xl">${item.icon}</span>
+                      <div>
+                        <div class="font-bold text-sm sm:text-base text-white">${item.name[currentLang]}</div>
+                        <span class="inline-block mt-1.5 px-2.5 py-0.5 rounded-md border font-hud text-[11px] font-bold ${tagStyle}">
+                          ${tagLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="text-right shrink-0">
+                      <div class="font-hud text-sm sm:text-base font-extrabold text-[#21d4e5]">
+                        RM ${item.price.toFixed(2)}
+                      </div>
+                      <div class="text-xs mt-1 ${selected ? 'text-[#34d399] font-bold' : 'text-[#8fb2d4]'}">
+                        ${selected
+                          ? (currentLang === 'en' ? '✓ Selected' : '✓ Dipilih')
+                          : (currentLang === 'en' ? '+ Select' : '+ Pilih')}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Action Footer -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                onclick="resetStage6BudgetMission()"
+                class="px-5 py-3 rounded-xl bg-[#102641] hover:bg-[#1a3a63] text-slate-200 border border-white/15 font-hud text-xs sm:text-sm font-bold uppercase transition"
+              >
+                ${currentLang === 'en' ? 'Reset Mission' : 'Set Semula Misi'}
+              </button>
+
+              <button
+                type="button"
+                onclick="verifyStage6BudgetMission()"
+                class="btn-mint px-6 py-3 rounded-full font-hud text-xs sm:text-sm font-extrabold uppercase tracking-wider"
+              >
+                ${currentLang === 'en' ? 'Confirm Budget (+50 XP)' : 'Sahkan Bajet (+50 XP)'}
+              </button>
+            </div>
+
+            ${marketFeedbackMsg ? `
+              <div class="p-3.5 rounded-xl text-xs sm:text-sm font-semibold ${fbClasses[marketFeedbackType] || fbClasses.warning}">
+                ${marketFeedbackMsg}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Panel 2: ALAT TAKTIKAL — Pengimbas Baki Wang -->
+          <div class="rounded-2xl bg-gradient-to-br from-[#170e1c] to-[#0a1324] border border-[#ff526b]/40 p-5 sm:p-6 space-y-4 shadow-xl">
+            <div class="flex items-center justify-between border-b border-[#ff526b]/25 pb-3.5">
+              <div>
+                <div class="font-hud text-xs font-extrabold uppercase tracking-widest text-[#ff526b]">
+                  ${currentLang === 'en' ? 'TACTICAL TOOL' : 'ALAT TAKTIKAL'}
+                </div>
+                <h3 class="font-hud text-xl sm:text-2xl font-extrabold text-white mt-0.5">
+                  ${currentLang === 'en' ? 'Change Scanner Tool' : 'Pengimbas Baki Wang'}
+                </h3>
+              </div>
+              <span class="text-3xl">🧮</span>
+            </div>
+
+            <div class="space-y-3.5">
+              <div>
+                <label class="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
+                  ${currentLang === 'en' ? 'Amount Paid (RM)' : 'Wang Dibayar (RM)'}
+                </label>
+                <input
+                  id="marketCalcPaidInput"
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  value="${marketCalcPaid}"
+                  oninput="marketCalcPaid = this.value"
+                  class="w-full px-4 py-3 rounded-xl bg-[#070f1d] border border-white/15 focus:border-[#21d4e5] font-hud text-base font-bold text-white outline-none transition"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
+                  ${currentLang === 'en' ? 'Total Item Price (RM)' : 'Jumlah Harga Barang (RM)'}
+                </label>
+                <input
+                  id="marketCalcPriceInput"
+                  type="number"
+                  step="0.05"
+                  min="0"
+                  value="${marketCalcPrice}"
+                  oninput="marketCalcPrice = this.value"
+                  class="w-full px-4 py-3 rounded-xl bg-[#070f1d] border border-white/15 focus:border-[#21d4e5] font-hud text-base font-bold text-white outline-none transition"
+                />
+              </div>
+
+              <button
+                type="button"
+                onclick="calculateStage6ChangeScanner()"
+                class="btn-red w-full py-3.5 rounded-xl font-hud text-xs sm:text-sm font-extrabold uppercase tracking-widest"
+              >
+                ${currentLang === 'en' ? 'CALCULATE CHANGE NOW' : 'KIRA BAKI SEKARANG'}
+              </button>
+
+              <div class="p-4 rounded-xl bg-[#060d1a] border border-[#21d4e5]/30 text-center">
+                <div class="font-hud text-xs font-bold uppercase tracking-wider text-[#8fb2d4]">
+                  ${currentLang === 'en' ? 'YOUR CHANGE' : 'BAKI WANG ANDA'}
+                </div>
+                <div class="font-hud text-2xl sm:text-3xl font-black mt-1 ${marketCalcIsShort ? 'text-[#ff526b]' : 'text-[#21d4e5]'}">
+                  ${marketCalcBalanceText}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleMarketBudgetItem(id) {
+      if (marketSelectedIds.includes(id)) {
+        marketSelectedIds = marketSelectedIds.filter(x => x !== id);
+      } else {
+        marketSelectedIds.push(id);
+      }
+      marketFeedbackMsg = null;
+      renderActiveStageWorkspace();
+    }
+
+    function resetStage6BudgetMission() {
+      marketSelectedIds = [];
+      marketFeedbackMsg = null;
+      renderActiveStageWorkspace();
+    }
+
+    function verifyStage6BudgetMission() {
+      let totalSpent = 0;
+      let needsCount = 0;
+      marketSelectedIds.forEach(id => {
+        const item = marketBudgetCatalog.find(x => x.id === id);
+        if (item) {
+          totalSpent += item.price;
+          if (item.type === 'need') needsCount++;
+        }
+      });
+
+      if (marketSelectedIds.length === 0) {
+        marketFeedbackType = "warning";
+        marketFeedbackMsg = currentLang === 'en'
+          ? "Please select at least one item for your mission!"
+          : "Sila pilih sekurang-kurangnya satu item untuk misi anda!";
+        renderActiveStageWorkspace();
+        return;
+      }
+
+      if (totalSpent > 20.00 + 0.001) {
+        marketFeedbackType = "error";
+        marketFeedbackMsg = currentLang === 'en'
+          ? `I.R.I.S. Warning! Total RM${totalSpent.toFixed(2)} exceeds the RM20.00 budget. Reduce want items!`
+          : `Amaran I.R.I.S.! Jumlah RM${totalSpent.toFixed(2)} melebihi bajet RM20.00. Kurangkan item kehendak!`;
+        renderActiveStageWorkspace();
+        return;
+      }
+
+      if (needsCount >= 2) {
+        const savedAmount = 20.00 - totalSpent;
+        marketFeedbackType = "success";
+        marketFeedbackMsg = currentLang === 'en'
+          ? `Well done Agent! Spending RM${totalSpent.toFixed(2)} is very smart with RM${savedAmount.toFixed(2)} remaining. (+50 XP)`
+          : `Tahniah Ejen! Perbelanjaan RM${totalSpent.toFixed(2)} sangat bijak dengan baki simpanan RM${savedAmount.toFixed(2)}. (+50 XP)`;
+        completeStage(6, 50);
+        renderActiveStageWorkspace();
+      } else {
+        marketFeedbackType = "warning";
+        marketFeedbackMsg = currentLang === 'en'
+          ? "Within budget, but make sure you select at least 2 Need (Keperluan) items!"
+          : "Bajet mencukupi, tetapi pastikan anda memilih sekurang-kurangnya 2 item Keperluan!";
+        renderActiveStageWorkspace();
+      }
+    }
+
+    function calculateStage6ChangeScanner() {
+      const paidEl = document.getElementById('marketCalcPaidInput');
+      const priceEl = document.getElementById('marketCalcPriceInput');
+      if (paidEl) marketCalcPaid = paidEl.value;
+      if (priceEl) marketCalcPrice = priceEl.value;
+
+      const paid = parseFloat(marketCalcPaid) || 0;
+      const price = parseFloat(marketCalcPrice) || 0;
+      const diff = paid - price;
+
+      if (diff < 0) {
+        marketCalcIsShort = true;
+        marketCalcBalanceText = currentLang === 'en'
+          ? `Short RM ${Math.abs(diff).toFixed(2)}`
+          : `Kurang RM ${Math.abs(diff).toFixed(2)}`;
+      } else {
+        marketCalcIsShort = false;
+        marketCalcBalanceText = `RM ${diff.toFixed(2)}`;
+      }
+      renderActiveStageWorkspace();
+    }
+
+    // --- STAGE 7: 7. Agent Test (8 Questions, Pass >= 6/8, Retake with new questions) ---
+    function renderStage7AgentTest(box) {
+      if (m7RoundQuestions.length === 0) initMission7Round(false);
+
+      if (m7RoundFinished) {
+        const passed = m7Score >= 6;
+        box.innerHTML = `
+          <div class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🎯</span>
+                <div>
+                  <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 07 / 08 • FINAL EVALUATION</div>
+                  <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                    ${currentLang === 'en' ? '7. AGENT TEST — TEST RESULT' : '7. UJIAN EJEN — KEPUTUSAN UJIAN'}
+                  </h2>
+                </div>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-hud font-bold ${passed ? 'bg-[#34d399]/20 text-[#34d399] border border-[#34d399]/40' : 'bg-[#ff526b]/20 text-[#ff526b] border border-[#ff526b]/40'}">
+                ${passed ? '✓ COMPLETED' : '⚠️ INCOMPLETE'}
+              </span>
+            </div>
+
+            <div class="bg-[#07162b] border ${passed ? 'border-[#34d399]/50' : 'border-[#ff526b]/50'} rounded-2xl p-6 sm:p-8 text-center max-w-2xl mx-auto space-y-4">
+              <div class="text-5xl">${passed ? '🏆' : '⚠️'}</div>
+              <div class="font-hud text-3xl sm:text-4xl font-black ${passed ? 'text-[#34d399]' : 'text-[#ff526b]'}">
+                ${m7Score} / 8 ${currentLang === 'en' ? 'CORRECT' : 'BETUL'}
+              </div>
+              <p class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                ${passed
+                  ? (currentLang === 'en'
+                      ? 'Outstanding tactical precision! You answered at least 6/8 questions correctly. Agent Test is COMPLETED!'
+                      : 'Ketepatan taktikal yang cemerlang! Anda menjawab sekurang-kurangnya 6/8 soalan dengan betul. Ujian Ejen SELESAI!')
+                  : (currentLang === 'en'
+                      ? 'Agent Test Incomplete! You need at least 6/8 correct answers to pass. Retake the test with a fresh set of 8 questions!'
+                      : 'Ujian Ejen Tidak Lengkap! Anda perlu sekurang-kurangnya 6/8 jawapan betul untuk lulus. Ambil semula ujian dengan 8 soalan baharu!')}
+              </p>
+
+              <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                ${passed ? `
+                  <button type="button" onclick="selectStage(8)" class="btn-mint px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    ${currentLang === 'en' ? 'Claim Stage 8: Final Rank →' : 'Tuntut Misi 8: Pangkat Akhir →'}
+                  </button>
+                  <button type="button" onclick="initMission7Round(true); renderActiveStageWorkspace();" class="px-5 py-3.5 rounded-xl bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-xs uppercase font-bold">
+                    🔄 ${currentLang === 'en' ? 'Retake New 8-Question Set' : 'Ulang Set 8 Soalan Baharu'}
+                  </button>
+                ` : `
+                  <button type="button" onclick="initMission7Round(true); renderActiveStageWorkspace();" class="btn-red px-6 py-3.5 rounded-xl font-hud text-sm uppercase">
+                    🔄 ${currentLang === 'en' ? 'Retake Agent Test (New Questions)' : 'Ambil Semula Ujian Ejen (Soalan Baharu)'}
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const q = m7RoundQuestions[m7Index];
+      box.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">🎯</span>
+              <div>
+                <div class="font-hud text-xs font-bold uppercase text-[#21d4e5]">STAGE 07 / 08 • PASS TARGET: ≥ 6 / 8</div>
+                <h2 class="font-hud text-2xl sm:text-3xl font-extrabold text-white">
+                  ${currentLang === 'en' ? '7. AGENT TEST: 8-CHALLENGE ASSESSMENT' : '7. UJIAN EJEN: PENILAIAN 8 CABARAN'}
+                </h2>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold text-[#ffdf59]">
+                ${currentLang === 'en' ? `Question ${m7Index + 1} of 8` : `Soalan ${m7Index + 1} daripada 8`}
+              </span>
+              <span class="px-3 py-1 rounded-xl bg-[#07162b] border border-white/10 font-hud text-xs font-bold text-[#34d399]">
+                ${currentLang === 'en' ? 'SCORE' : 'MARKAH'}: ${m7Score}/8
+              </span>
+            </div>
+          </div>
+
+          <div class="w-full h-2 bg-[#07162b] rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-[#21d4e5] to-[#34d399] transition-all duration-300" style="width: ${Math.round(((m7Index + 1) / 8) * 100)}%;"></div>
+          </div>
+
+          <div class="bg-[#07162b] p-6 sm:p-7 rounded-2xl border border-[#21d4e5]/30 space-y-5 max-w-3xl mx-auto">
+            <div class="font-hud text-xs font-bold uppercase tracking-wider text-[#21d4e5]">
+              ${currentLang === 'en' ? `CHALLENGE 0${m7Index + 1} / 08` : `CABARAN 0${m7Index + 1} / 08`}
+            </div>
+            <p class="text-base sm:text-xl font-bold text-white leading-snug">${q.q[currentLang]}</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              ${q.opts.map((opt, idx) => {
+                let btnStyle = "bg-[#102641] hover:bg-[#1a3a63] text-white border-[#21d4e5]/30";
+                if (m7AnsweredCurrent) {
+                  if (idx === q.ans) {
+                    btnStyle = "bg-[#34d399]/25 text-[#34d399] border-[#34d399]";
+                  } else if (idx === m7SelectedOption) {
+                    btnStyle = "bg-[#ff526b]/25 text-[#ff526b] border-[#ff526b]";
+                  } else {
+                    btnStyle = "bg-[#0a1b31] text-[#8fb2d4] border-white/10 opacity-60";
+                  }
+                }
+                return `
+                  <button type="button" ${m7AnsweredCurrent ? 'disabled' : ''} onclick="answerStage7AgentTest(${idx})" class="p-4 rounded-xl border font-hud text-base sm:text-lg font-extrabold text-left transition ${btnStyle}">
+                    ${String.fromCharCode(65 + idx)}. ${opt}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            ${m7AnsweredCurrent ? `
+              <div class="pt-2 flex justify-end">
+                <button type="button" onclick="nextStage7Question()" class="btn-cyan px-6 py-3 rounded-xl font-hud text-sm uppercase">
+                  ${m7Index < 7
+                    ? (currentLang === 'en' ? 'Next Challenge →' : 'Cabaran Seterusnya →')
+                    : (currentLang === 'en' ? 'View Agent Test Result →' : 'Lihat Keputusan Ujian Ejen →')}
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function answerStage7AgentTest(selectedIdx) {
+      if (m7AnsweredCurrent) return;
+      const q = m7RoundQuestions[m7Index];
+      m7AnsweredCurrent = true;
+      m7SelectedOption = selectedIdx;
+      if (selectedIdx === q.ans) {
+        m7Score++;
+        showToast("VERIFIED!", currentLang === 'en' ? `Correct: ${q.opts[q.ans]}` : `Tepat sekali: ${q.opts[q.ans]}`, "✅");
+      } else {
+        showToast("INCORRECT", currentLang === 'en' ? `Correct answer: ${q.opts[q.ans]}` : `Jawapan betul: ${q.opts[q.ans]}`, "❌");
+      }
+      renderActiveStageWorkspace();
+    }
+
+    function nextStage7Question() {
+      if (m7Index < 7) {
+        m7Index++;
+        m7AnsweredCurrent = false;
+        m7SelectedOption = null;
+        renderActiveStageWorkspace();
+      } else {
+        m7RoundFinished = true;
+        if (m7Score >= 6) {
+          m7NeedsRetake = false;
+          completeStage(7, 200);
+        } else {
+          completedStages[6] = false;
+          m7NeedsRetake = true;
+          renderStagesGrid();
+          updateTopProgress();
+          showToast(
+            currentLang === 'en' ? "AGENT TEST INCOMPLETE" : "UJIAN EJEN TIDAK LENGKAP",
+            currentLang === 'en' ? `Score ${m7Score}/8 (< 6/8). Retake with new questions!` : `Markah ${m7Score}/8 (< 6/8). Sila ambil semula dengan soalan baharu!`,
+            "⚠️"
+          );
+        }
+        renderActiveStageWorkspace();
+      }
+    }
+
+    // --- STAGE 8: 8. Final Rank (Earn your agent rank) ---
+    const squadRealRoster = [
+      {
+        key: 'ali',
+        name: 'EJEN ALI',
+        role: 'TERAS TEKNO',
+        file: 'Screenshot 2026-11-12 224744.png',
+        border: 'border-[#ff526b]',
+        glow: 'shadow-[0_0_20px_rgba(255,82,107,0.45)]',
+        text: 'text-[#ff526b]',
+        fallbackSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><defs><linearGradient id="bgAli" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient></defs><rect width="120" height="140" fill="url(#bgAli)"/><path d="M22 140 C22 102, 98 102, 98 140 Z" fill="#e11d48"/><path d="M40 105 L60 128 L80 105 Z" fill="#1e3a8a"/><rect x="44" y="124" width="32" height="10" rx="3" fill="#ffffff"/><polygon points="34,42 28,14 48,26 60,10 72,26 92,14 86,42" fill="#0f172a"/><circle cx="60" cy="60" r="30" fill="#fde68a"/><path d="M30 54 Q40 24 60 24 Q80 24 90 54 Q76 38 60 40 Q44 38 30 54 Z" fill="#0f172a"/><rect x="33" y="47" width="54" height="14" rx="7" fill="#0284c7" fill-opacity="0.7" stroke="#21d4e5" stroke-width="2.5"/><circle cx="48" cy="58" r="4.5" fill="#1e293b"/><circle cx="72" cy="58" r="4.5" fill="#1e293b"/><circle cx="49.5" cy="56.5" r="1.5" fill="#ffffff"/><circle cx="73.5" cy="56.5" r="1.5" fill="#ffffff"/><path d="M51 74 Q60 82 69 74" stroke="#b91c1c" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="96" cy="96" r="11" fill="#15803d" stroke="#ffdf59" stroke-width="2"/><circle cx="96" cy="96" r="4" fill="#ef4444"/></svg>`
+      },
+      {
+        key: 'alicia',
+        name: 'ALICIA',
+        role: 'TERAS NEURO',
+        file: 'Screenshot 2026-11-12 224715.png',
+        border: 'border-[#ffdf59]',
+        glow: 'shadow-[0_0_20px_rgba(255,223,89,0.45)]',
+        text: 'text-[#ffdf59]',
+        fallbackSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><defs><linearGradient id="bgAli2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="#0f172a"/></linearGradient></defs><rect width="120" height="140" fill="url(#bgAli2)"/><path d="M26 88 L32 32 L88 32 L94 88 Z" fill="#0f172a"/><path d="M26 140 C26 102, 94 102, 94 140 Z" fill="#facc15"/><path d="M42 104 L60 124 L78 104 Z" fill="#14532d"/><circle cx="60" cy="60" r="28" fill="#fed7aa"/><path d="M32 52 Q60 36 88 52 Q86 24 60 24 Q34 24 32 52 Z" fill="#0f172a"/><rect x="33" y="34" width="54" height="7" rx="3.5" fill="#facc15"/><circle cx="48" cy="58" r="4.5" fill="#3b2f2f"/><circle cx="72" cy="58" r="4.5" fill="#3b2f2f"/><circle cx="49.5" cy="56.5" r="1.5" fill="#ffffff"/><circle cx="73.5" cy="56.5" r="1.5" fill="#ffffff"/><path d="M52 74 Q60 80 68 74" stroke="#be123c" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>`
+      },
+      {
+        key: 'bakar',
+        name: 'EJEN BAKAR',
+        role: 'TERAS KOMBAT',
+        file: 'Screenshot 2026-11-12 224820.png',
+        border: 'border-[#38bdf8]',
+        glow: 'shadow-[0_0_20px_rgba(56,189,248,0.45)]',
+        text: 'text-[#38bdf8]',
+        fallbackSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><defs><linearGradient id="bgBak" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0c4a6e"/><stop offset="100%" stop-color="#0f172a"/></linearGradient></defs><rect width="120" height="140" fill="url(#bgBak)"/><path d="M12 140 C12 96, 108 96, 108 140 Z" fill="#0284c7"/><rect x="24" y="106" width="72" height="34" rx="12" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/><rect x="32" y="32" width="56" height="62" rx="22" fill="#fde68a"/><path d="M34 36 Q60 14 86 36 Z" fill="#ffffff" stroke="#ef4444" stroke-width="3"/><rect x="30" y="33" width="60" height="6" rx="3" fill="#ef4444"/><circle cx="48" cy="58" r="4.2" fill="#1e293b"/><circle cx="72" cy="58" r="4.2" fill="#1e293b"/><path d="M46 75 Q60 86 74 75" stroke="#991b1b" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg>`
+      },
+      {
+        key: 'rizwan',
+        name: 'EJEN RIZWAN',
+        role: 'TERAS INVISO',
+        file: 'Screenshot 2026-11-12 224612.jpg',
+        border: 'border-slate-300',
+        glow: 'shadow-[0_0_20px_rgba(203,213,225,0.4)]',
+        text: 'text-slate-200',
+        fallbackSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><defs><linearGradient id="bgRiz" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#090d16"/></linearGradient></defs><rect width="120" height="140" fill="url(#bgRiz)"/><path d="M22 140 L34 94 L86 94 L98 140 Z" fill="#cbd5e1"/><polygon points="34,94 60,118 86,94" fill="#1e293b"/><rect x="33" y="30" width="54" height="58" rx="22" fill="#fed7aa"/><path d="M31 44 Q36 18 66 20 Q88 22 89 44 Q74 30 56 32 Q40 32 31 44 Z" fill="#0f172a"/><circle cx="48" cy="55" r="3.8" fill="#1e293b"/><circle cx="72" cy="55" r="3.8" fill="#1e293b"/><path d="M52 72 Q62 75 70 70" stroke="#9a3412" stroke-width="2.5" fill="none" stroke-linecap="round"/><line x1="66" y1="72" x2="84" y2="67" stroke="#f8fafc" stroke-width="2.5" stroke-linecap="round"/></svg>`
+      },
+      {
+        key: 'munah',
+        name: 'PUAN MUNAH',
+        role: 'GURU SRT CYBERAYA',
+        file: 'Screenshot 2026-11-12 224523.png',
+        border: 'border-[#34d399]',
+        glow: 'shadow-[0_0_20px_rgba(52,211,153,0.45)]',
+        text: 'text-[#34d399]',
+        fallbackSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><defs><linearGradient id="bgMun" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#065f46"/><stop offset="100%" stop-color="#0f172a"/></linearGradient></defs><rect width="120" height="140" fill="url(#bgMun)"/><path d="M22 140 C22 104, 98 104, 98 140 Z" fill="#c2410c"/><path d="M26 68 C26 18, 94 18, 94 68 L100 132 L20 132 Z" fill="#eab308"/><circle cx="60" cy="60" r="26" fill="#fde68a"/><path d="M40 47 Q48 42 55 47" stroke="#1e293b" stroke-width="2.5" fill="none"/><path d="M65 47 Q72 42 80 47" stroke="#1e293b" stroke-width="2.5" fill="none"/><polygon points="38,54 56,54 52,63 41,63" fill="#ffffff" fill-opacity="0.55" stroke="#f59e0b" stroke-width="2"/><polygon points="64,54 82,54 79,63 68,63" fill="#ffffff" fill-opacity="0.55" stroke="#f59e0b" stroke-width="2"/><line x1="56" y1="56" x2="64" y2="56" stroke="#f59e0b" stroke-width="2"/><circle cx="48" cy="58" r="3" fill="#1e293b"/><circle cx="72" cy="58" r="3" fill="#1e293b"/><circle cx="78" cy="65" r="1.8" fill="#451a03"/><path d="M51 75 Q60 69 69 75" stroke="#991b1b" stroke-width="2.8" fill="none" stroke-linecap="round"/><line x1="28" y1="128" x2="94" y2="112" stroke="#d97706" stroke-width="3.5" stroke-linecap="round"/></svg>`
+      },
+      {
+        key: 'comot',
+        name: 'COMOT',
+        role: 'EJEN HAIWAN M.A.T.A',
+        file: 'Screenshot 2026-11-12 224852.png',
+        border: 'border-[#21d4e5]',
+        glow: 'shadow-[0_0_20px_rgba(33,212,229,0.5)]',
+        text: 'text-[#21d4e5]',
+        fallbackSvg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140"><defs><linearGradient id="bgCom" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#164e63"/><stop offset="100%" stop-color="#0f172a"/></linearGradient></defs><rect width="120" height="140" fill="url(#bgCom)"/><ellipse cx="60" cy="112" rx="28" ry="26" fill="#cbd5e1"/><polygon points="30,52 24,18 52,36" fill="#94a3b8"/><polygon points="90,52 96,18 68,36" fill="#94a3b8"/><polygon points="33,47 29,26 47,38" fill="#f472b6"/><polygon points="87,47 91,26 73,38" fill="#f472b6"/><ellipse cx="60" cy="64" rx="34" ry="28" fill="#e2e8f0"/><circle cx="46" cy="60" r="7" fill="#16a34a"/><circle cx="46" cy="60" r="3" fill="#0f172a"/><circle cx="74" cy="60" r="7" fill="#0284c7"/><circle cx="74" cy="60" r="3" fill="#0f172a"/><polygon points="56,71 64,71 60,76" fill="#fb7185"/><path d="M51 80 Q60 87 69 80" stroke="#334155" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`
+      }
+    ];
+
+    function getSavedSquadPhoto(key) {
+      try {
+        return localStorage.getItem('mata_squad_photo_' + key) || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function applySquadFallback(imgEl, key) {
+      const member = squadRealRoster.find(m => m.key === key);
+      if (!member) return;
+      imgEl.onerror = null;
+      imgEl.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(member.fallbackSvg);
+    }
+
+    function handleSingleSquadPhoto(event, key) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          localStorage.setItem('mata_squad_photo_' + key, e.target.result);
+        } catch (err) {}
+        renderActiveStageWorkspace();
+        showToast("BOOM! PHOTO LOCKED", "Character photo updated and locked!", "💥");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleSquadPhotoBatch(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      files.forEach(file => {
+        const fname = file.name.toLowerCase();
+        let matchedKey = null;
+        if (fname.includes('224744') || fname.includes('ali')) matchedKey = 'ali';
+        else if (fname.includes('224715') || fname.includes('alicia')) matchedKey = 'alicia';
+        else if (fname.includes('224820') || fname.includes('bakar')) matchedKey = 'bakar';
+        else if (fname.includes('224612') || fname.includes('rizwan') || fname.includes('rizman')) matchedKey = 'rizwan';
+        else if (fname.includes('224523') || fname.includes('munah')) matchedKey = 'munah';
+        else if (fname.includes('224852') || fname.includes('comot')) matchedKey = 'comot';
+
+        if (!matchedKey) {
+          const emptySlot = squadRealRoster.find(m => !localStorage.getItem('mata_squad_photo_' + m.key));
+          if (emptySlot) matchedKey = emptySlot.key;
+        }
+        if (matchedKey) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              localStorage.setItem('mata_squad_photo_' + matchedKey, e.target.result);
+            } catch (err) {}
+            renderActiveStageWorkspace();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      showToast("SQUAD PHOTOS LOCKED!", "Real Ejen Ali squad characters loaded into the BOOM banner!", "💥");
+    }
+
+    function getOverallAgentGrade() {
+      const doneCount = completedStages.filter(Boolean).length;
+      if (doneCount === 8 && totalXP >= 1050) return { grade: 'A', isFlyingColours: true };
+      if (doneCount >= 7 && totalXP >= 850) return { grade: 'B', isFlyingColours: true };
+      if (doneCount >= 5) return { grade: 'C', isFlyingColours: false };
+      if (doneCount >= 3) return { grade: 'D', isFlyingColours: false };
+      return { grade: 'E', isFlyingColours: false };
+    }
+
+    function renderEjenAliSquadAnimation() {
+      const allCached = squadRealRoster.every(m => !!getSavedSquadPhoto(m.key));
+
+      return `
+        <div class="space-y-3 pt-2">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
+            ${squadRealRoster.map((member, idx) => {
+              const savedSrc = getSavedSquadPhoto(member.key);
+              const fallbackDataUri = 'data:image/svg+xml;utf8,' + encodeURIComponent(member.fallbackSvg);
+              const initialSrc = savedSrc || member.file;
+              return `
+                <label class="squad-boom-card squad-delay-${idx} relative bg-[#07162b]/95 border-2 ${member.border} ${member.glow} rounded-2xl p-2.5 flex flex-col items-center overflow-hidden cursor-pointer group" title="Click to insert real photo for ${member.name}">
+                  <div class="boom-ring absolute inset-0 rounded-2xl border-2 border-[#ffdf59] pointer-events-none" style="animation-delay: ${0.05 + idx * 0.11}s;"></div>
+                  <div class="w-24 h-28 sm:w-28 sm:h-32 rounded-xl overflow-hidden bg-[#0b1f3a] border border-white/15 relative">
+                    <img
+                      src="${initialSrc}"
+                      onerror="applySquadFallback(this, '${member.key}')"
+                      alt="${member.name}"
+                      class="w-full h-full object-cover object-top transition duration-300 group-hover:scale-105"
+                    />
+                    ${!savedSrc ? `
+                      <span class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-[#07162b]/85 text-[9px] font-hud font-bold text-[#ffdf59] border border-[#ffdf59]/40 opacity-90 group-hover:opacity-100">
+                        + FOTO
+                      </span>
+                    ` : ''}
+                  </div>
+                  <span class="font-hud text-xs font-black ${member.text} mt-2 tracking-wide">${member.name}</span>
+                  <span class="text-[9px] font-hud font-bold text-[#8fb2d4] uppercase">${member.role}</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="handleSingleSquadPhoto(event, '${member.key}')" />
+                </label>
+              `;
+            }).join('')}
+          </div>
+
+          ${!allCached ? `
+            <div class="pt-1">
+              <label class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#07162b]/90 hover:bg-[#102641] border border-[#ffdf59]/50 text-[11px] font-hud font-extrabold text-[#ffdf59] cursor-pointer transition shadow">
+                <span>💥</span>
+                <span>${currentLang === 'en' ? 'Click Any Character Card or Here to Insert Real Photos' : 'Klik Mana-Mana Kad Watak atau Di Sini Untuk Masuk Gambar Sebenar'}</span>
+                <input type="file" accept="image/*" multiple class="hidden" onchange="handleSquadPhotoBatch(event)" />
+              </label>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderStage8FinalRank(box) {
+      const doneCount = completedStages.filter(Boolean).length;
+      const allPriorDone = completedStages.slice(0, 7).every(Boolean);
+
+      if (allPriorDone && !completedStages[7]) {
+        completeStage(8, 250);
+      }
+
+      const rank = getCurrentRankInfo();
+      const rankTitle = `${rank.code} — ${currentLang === 'en' ? rank.labelEn : rank.labelBm}`;
+      const gradeEval = getOverallAgentGrade();
+      const isFly = gradeEval.isFlyingColours;
+
+      const bannerHTML = isFly
+        ? `
+          <div class="final-banner-enter relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#0d3b3e] via-[#102e4a] to-[#3b2f0b] border-2 border-[#ffdf59] shadow-[0_0_35px_rgba(255,223,89,0.28)] space-y-4">
+            <div class="confetti-spark text-2xl sm:text-3xl tracking-widest select-none">💥 🎉 ✨ 🏆 ✨ 🎉 💥</div>
+            <div class="inline-block px-4 py-1 rounded-full bg-[#34d399]/20 border border-[#34d399] font-hud text-xs sm:text-sm font-black tracking-widest text-[#34d399]">
+              GRADE ${gradeEval.grade} • ${rankTitle}
+            </div>
+            <h2 class="font-hud text-2xl sm:text-4xl md:text-5xl font-black text-[#ffdf59] tracking-wide drop-shadow">
+              CONGRATULATIONS YOU PASS WITH A FLYING COLOURS!
+            </h2>
+            <p class="text-sm sm:text-base text-slate-100 max-w-2xl mx-auto font-medium">
+              ${currentLang === 'en'
+                ? `Outstanding achievement, ${agentName}! Ejen Ali, Alicia, Ejen Bakar, Ejen Rizwan, Puan Munah & Comot salute your mastery of Malaysian Ringgit & Sen!`
+                : `Pencapaian cemerlang, ${agentName}! Ejen Ali, Alicia, Ejen Bakar, Ejen Rizwan, Puan Munah & Comot mengucapkan syabas atas kejayaan cemerlang anda!`}
+            </p>
+            ${renderEjenAliSquadAnimation()}
+          </div>
+        `
+        : `
+          <div class="final-banner-enter relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#162847] via-[#0e1f3a] to-[#2b1429] border-2 border-[#21d4e5] shadow-[0_0_30px_rgba(33,212,229,0.22)] space-y-4">
+            <div class="text-2xl sm:text-3xl tracking-widest select-none">💥 💙 ⚡ 🛡️ 💪 ⚡ 💙 💥</div>
+            <div class="inline-block px-4 py-1 rounded-full bg-[#21d4e5]/20 border border-[#21d4e5] font-hud text-xs sm:text-sm font-black tracking-widest text-[#21d4e5]">
+              GRADE ${gradeEval.grade} • ${rankTitle}
+            </div>
+            <h2 class="font-hud text-2xl sm:text-4xl font-black text-white tracking-wide">
+              DON'T GIVE UP! YOU HAVE DONE YOUR BEST!
+            </h2>
+            <p class="text-sm sm:text-base text-slate-200 max-w-2xl mx-auto font-medium">
+              ${currentLang === 'en'
+                ? `Keep going, ${agentName}! Every great M.A.T.A Agent improves through practice. Ejen Ali, Alicia, Bakar, Rizwan, Puan Munah & Comot believe in you—retake any incomplete missions to reach Grade A / B!`
+                : `Jangan berputus asa, ${agentName}! Anda telah melakukan yang terbaik. Ejen Ali, Alicia, Bakar, Rizwan, Puan Munah & Comot sentiasa menyokong anda—cuba semula misi yang belum lengkap untuk capai Gred A / B!`}
+            </p>
+            ${renderEjenAliSquadAnimation()}
+          </div>
+        `;
+
+      box.innerHTML = `
+        <div class="space-y-6 text-center py-2">
+          ${bannerHTML}
+
+          <div class="text-xs sm:text-sm text-[#8fb2d4]">
+            ${currentLang === 'en'
+              ? `Completed ${completedStages.filter(Boolean).length} of 8 Simulation Stages • Total Tactical Score: ${totalXP} XP`
+              : `Melengkapkan ${completedStages.filter(Boolean).length} daripada 8 Misi Simulasi • Jumlah Skor Taktikal: ${totalXP} XP`}
+          </div>
+
+          <div class="flex flex-wrap justify-center gap-3 pt-1">
+            ${!allPriorDone ? `
+              <button type="button" onclick="selectStage(completedStages.findIndex(x => !x) + 1)" class="btn-yellow px-6 py-3 rounded-xl font-hud text-xs uppercase">
+                ${currentLang === 'en' ? 'Go to Next Incomplete Stage' : 'Ke Misi Belum Selesai Seterusnya'}
+              </button>
+            ` : ''}
+            <button type="button" onclick="resetFullMission()" class="px-6 py-3 rounded-xl bg-[#102641] hover:bg-[#1a3a63] text-[#21d4e5] border border-[#21d4e5]/40 font-hud text-xs uppercase font-bold">
+              ↺ ${currentLang === 'en' ? 'Restart Full 8-Stage Simulation' : 'Mula Semula 8 Misi Penuh'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function resetFullMission() {
+      if (gadgetTimerInterval) {
+        clearInterval(gadgetTimerInterval);
+        gadgetTimerInterval = null;
+      }
+      completedStages = [false, false, false, false, false, false, false, false];
+      totalXP = 0;
+
+      m2UsedIndices = [];
+      m2NeedsRetake = false;
+      initMission2Round(false);
+
+      m3UsedIndices = [];
+      m3NeedsRetake = false;
+      initMission3Round(false);
+
+      gadgetLabItems = [];
+      gadgetTimer = 60;
+      gadgetTimerRunning = false;
+      gadgetNeedsRetake = false;
+
+      irisSenA = '';
+      irisSenB = '';
+      irisSimResult = null;
+      irisLessonOpen = false;
+      m5UsedIndices = [];
+      m5NeedsRetake = false;
+      initMission5Round(false);
+
+      marketSelectedIds = [1, 2];
+      marketCalcPaid = "10.00";
+      marketCalcPrice = "4.50";
+      marketCalcBalanceText = "RM 5.50";
+      marketCalcIsShort = false;
+      marketFeedbackMsg = null;
+
+      m7UsedIndices = [];
+      m7NeedsRetake = false;
+      initMission7Round(false);
+
+      selectStage(1);
+      updateTopProgress();
+    }
+
+    // ==========================================
+    // 7. FLOATING COMOT × I.R.I.S. AI POP-UP CHAT
+    // ==========================================
+    function toggleComotChat(forceState) {
+      const popup = document.getElementById('comotIrisPopup');
+      if (!popup) return;
+      isComotChatOpen = typeof forceState === 'boolean' ? forceState : !isComotChatOpen;
+      if (isComotChatOpen) {
+        popup.classList.remove('hidden');
+        const input = document.getElementById('irisUserInput');
+        if (input) setTimeout(() => input.focus(), 80);
+      } else {
+        popup.classList.add('hidden');
+      }
+    }
+
+    function appendIrisChatBubble(sender, text) {
+      const log = document.getElementById('irisChatLog');
+      if (!log) return;
+      const bubble = document.createElement('div');
+      if (sender === 'user') {
+        bubble.className = "bg-[#21d4e5]/20 border border-[#21d4e5]/50 rounded-xl p-2.5 text-xs text-white ml-6";
+        bubble.innerHTML = `<span class="font-hud text-[10px] font-bold text-[#ffdf59] block mb-0.5">${escapeHtmlText(agentName)}</span><span>${escapeHtmlText(text)}</span>`;
+      } else {
+        bubble.className = "bg-[#102641] border border-[#21d4e5]/30 rounded-xl p-2.5 text-xs text-slate-100 leading-relaxed mr-4";
+        bubble.innerHTML = `<span class="font-hud text-[10px] font-bold text-[#21d4e5] block mb-0.5">I.R.I.S. AI • COMOT</span><span>${text}</span>`;
+      }
+      log.appendChild(bubble);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function escapeHtmlText(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function handleIrisChatSubmit(event) {
+      event.preventDefault();
+      const input = document.getElementById('irisUserInput');
+      if (!input) return;
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      appendIrisChatBubble('user', q);
+      setTimeout(() => {
+        appendIrisChatBubble('iris', generateIrisReply(q));
+      }, 220);
+    }
+
+    function askIrisPreset(type) {
+      const labels = {
+        stage_hint: currentLang === 'en' ? "Give me a hint for my current stage!" : "Berikan petunjuk untuk misi semasa saya!",
+        regroup_100: currentLang === 'en' ? "How do I regroup 100 sen into RM1?" : "Bagaimana cara kumpul semula 100 sen menjadi RM1?",
+        place_value: currentLang === 'en' ? "Explain Ringgit and Sen place values!" : "Terangkan nilai tempat Ringgit dan Sen!"
+      };
+      const promptText = labels[type] || labels.stage_hint;
+      appendIrisChatBubble('user', promptText);
+      setTimeout(() => {
+        appendIrisChatBubble('iris', generateIrisReply(promptText, type));
+      }, 220);
+    }
+
+    function generateIrisReply(rawQ, presetType = null) {
+      const q = rawQ.toLowerCase();
+      const isEn = currentLang === 'en';
+
+      if (presetType === 'stage_hint' || q.includes('hint') || q.includes('petunjuk') || q.includes('stage') || q.includes('misi')) {
+        const hintsEn = {
+          1: "Stage 1 Hint: Enter your Agent Codename and click Acknowledge to begin Stage 2!",
+          2: "Stage 2 Hint: Look at the color & motif of the real Malaysian note/coin (e.g., RM100 is purple with Mount Kinabalu, RM5 is green with Hornbill). Get at least 3/5 correct!",
+          3: "Stage 3 Hint: Add the sen digits first. Whenever sen reaches 100 or more, carry RM1.00 over to the Ringgit side. Score at least 3/5!",
+          4: "Stage 4 Hint: Stay inside Gadget Lab for the full 60-second scanner timer while tapping notes & coins. Do not switch tabs early!",
+          5: "Stage 5 Hint: Enter two sen values (like 75 and 45) and click RUN SIMULATION. Every 100 sen regroups into RM1.00!",
+          6: "Stage 6 Hint: Add Aero Yoyo String (RM14.50) + IRIS Micro Cell (RM22.80) + Mini Comms Beacon (RM18.30) = RM55.60!",
+          7: "Stage 7 Hint: Complete all 8 Agent Test challenges and score at least 6/8 to pass!",
+          8: "Stage 8 Hint: Check the roadmap at the top—make sure Stages 1 through 7 all show ✓ COMPLETED to unlock RANK S!"
+        };
+        const hintsBm = {
+          1: "Petunjuk Misi 1: Masukkan Nama Kod Ejen anda dan tekan Sahkan untuk ke Misi 2!",
+          2: "Petunjuk Misi 2: Perhatikan warna & motif wang sebenar Malaysia (contoh: RM100 ungu Gunung Kinabalu, RM5 hijau Burung Kenyalang). Lulus sekurang-kurangnya 3/5!",
+          3: "Petunjuk Misi 3: Tambah digit sen dahulu. Jika sen mencapai 100 atau lebih, kumpul semula 100 sen sebagai RM1.00. Lulus sekurang-kurangnya 3/5!",
+          4: "Petunjuk Misi 4: Kekal dalam Gadget Lab selama 60 saat penuh semasa mengimbas wang. Jangan tukar misi sebelum masa tamat!",
+          5: "Petunjuk Misi 5: Masukkan dua nilai sen (seperti 75 dan 45) dan tekan JALANKAN SIMULASI. Setiap 100 sen = RM1.00!",
+          6: "Petunjuk Misi 6: Masukkan Tali Yoyo Aero (RM14.50) + Sel Mikro IRIS (RM22.80) + Suar Komunikasi Mini (RM18.30) = RM55.60!",
+          7: "Petunjuk Misi 7: Jawab semua 8 cabaran Ujian Ejen dan dapatkan sekurang-kurangnya 6/8 betul untuk lulus!",
+          8: "Petunjuk Misi 8: Semak peta 8 misi di atas—pastikan Misi 1 hingga 7 semuanya ✓ SELESAI untuk mencapai RANK S!"
+        };
+        return isEn ? hintsEn[activeStage] : hintsBm[activeStage];
+      }
+
+      if (presetType === 'regroup_100' || q.includes('100 sen') || q.includes('regroup') || q.includes('kumpul')) {
+        return isEn
+          ? "Meow! <strong>100 sen = RM1.00</strong>. For example, 75 sen + 45 sen = 120 sen. Take out 100 sen as RM1.00, leaving 20 sen → <strong>RM1.20</strong>!"
+          : "Meow! <strong>100 sen = RM1.00</strong>. Contohnya, 75 sen + 45 sen = 120 sen. Kumpulkan 100 sen sebagai RM1.00, baki 20 sen → <strong>RM1.20</strong>!";
+      }
+
+      if (presetType === 'place_value' || q.includes('place') || q.includes('nilai tempat') || q.includes('hundreds')) {
+        return isEn
+          ? "In <strong>RM 482.95</strong>: <strong>4</strong> is Hundreds, <strong>8</strong> is Tens, <strong>2</strong> is Ones, and <strong>95</strong> is Sen after the decimal point!"
+          : "Dalam <strong>RM 482.95</strong>: <strong>4</strong> ialah Ratus, <strong>8</strong> ialah Puluh, <strong>2</strong> ialah Sa, dan <strong>95</strong> ialah Sen selepas titik perpuluhan!";
+      }
+
+      return isEn
+        ? `Meow! I.R.I.S. scanned your question: <em>"${escapeHtmlText(rawQ)}"</em>. Remember: align decimal points when adding Ringgit & Sen, and 100 sen = RM1.00!`
+        : `Meow! I.R.I.S. mengimbas soalan anda: <em>"${escapeHtmlText(rawQ)}"</em>. Ingat: selarikan titik perpuluhan semasa menambah Ringgit & Sen, dan 100 sen = RM1.00!`;
+    }
+
+    // ==========================================
+    // 8. TOAST UTILITY
+    // ==========================================
+    let toastTimeout = null;
+    function showToast(title, msg, icon = "⚡") {
+      const banner = document.getElementById('toastBanner');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      banner.classList.remove('translate-x-[120%]');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('translate-x-[120%]');
+      }, 3600);
+    }
+  </script>
+</body>
+</html>
